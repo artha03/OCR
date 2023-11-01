@@ -8,7 +8,7 @@ LDLIBS = `pkg-config --libs sdl2 SDL2_image`
 
 all: display grayscale rotation luminance flou filtres
 
-SRC = display.c grayscale.c rotation.c luminance.c flou.c filtres.c
+SRC = display.c TraitementImage/grayscale.c rotation.c TraitementImage/luminance.c TraitementImage/flou.c filtres.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
