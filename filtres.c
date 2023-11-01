@@ -17,11 +17,10 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 // renderer: Renderer to draw on.
 // colored: Texture that contains the colored image.
 // grayscale: Texture that contains the grayscale image.
-void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* grayscale, SDL_Texture* flou,SDL_Texture* binarisation)
+void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* change)
 {
     SDL_Event event;
     SDL_Texture* t = colored;
-    int compt = 0;
 
     while (1)
     {
@@ -41,24 +40,9 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* grays
                 }
                 break;
 	case SDL_KEYDOWN:
-	  if (compt == 1)
+	  if (t == colored)
 	    {
-	      compt += 1;
-	      t = grayscale;
-	      draw(renderer,t);
-	      break;
-	    }
-	  if (compt == 2)
-	    {
-	      compt += 1;
-	      t = flou;
-	      draw(renderer,t);
-	      break;
-	    }
-	  if (compt == 3)
-	    {
-	      compt = 0;
-	      t = binarisation;
+	      t = change;
 	      draw(renderer,t);
 	      break;
 	    }
@@ -92,6 +76,33 @@ SDL_Surface* load_image(const char* path)
 //
 // pixel_color: Color of the pixel to convert in the RGB format.
 // format: Format of the pixel used by the surface.
+
+Uint32 pixel_to_grayscale(Uint32 pixel_color, SDL_PixelFormat* format)
+{
+    Uint8 r, g, b;
+    SDL_GetRGB(pixel_color, format, &r, &g, &b);
+
+    Uint8 average = 0.333 * r + 0.333 * g + 0.0333 * b;
+    
+    Uint32 color = SDL_MapRGB(format, average, average, average);
+
+    return color;
+}
+
+void surface_to_grayscale(SDL_Surface* surface)
+{
+    Uint32* pixels = surface->pixels;
+    int len = surface->w * surface->h;
+    SDL_PixelFormat* format = surface->format;
+
+    SDL_LockSurface(surface);
+    for (int i = 0;i<len;i++)
+      {
+	pixels[i] = pixel_to_grayscale(pixels[i],format);
+      }
+    SDL_UnlockSurface(surface);
+}
+
 Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
 {
     Uint8 r, g, b;
@@ -101,7 +112,7 @@ Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
 
     Uint32 color;
 
-    if(average>=127)
+    if(average>=100)
       {
 	color = SDL_MapRGB(format,0, 0, 0);
       }
@@ -122,23 +133,56 @@ void surface_to_bin(SDL_Surface* surface)
     SDL_LockSurface(surface);
     for (int i = 0;i<len;i++)
       {
-	pixels[i] = pixel_to_grayscale(pixels[i],format);
+	pixels[i] = pixel_to_bin(pixels[i],format);
       }
     SDL_UnlockSurface(surface);
 
-    //int w= surface->w;
-    //int h = surface->h;
+}
 
-    //for(int i = 0; i < h; i++)
-    // {
-    //for(int j = 0; j < w; j++)
-    //	  {
-    //	    Uint32 color = SDL_GetRGB(pixels[i*w+j, s->format, &r, &g, &b);
-    //	    pixels[i * w + j] = SDL_MapRGB(s->format, 255 - color.r, 255 - color.g, 255 - color.b);
-    //	  }
-    //}
+static Uint32 moyenne(SDL_Surface *surface, int i, int j, int n)
+{
+    const int initial_h = SDL_max(i - n, 0);
+    const int initial_w = SDL_max(j - n, 0);
+    const int final_h = SDL_min(i + n, surface->h - 1);
+    const int final_w = SDL_min(j + n, surface->w - 1);
+    const int nb_pixel = ((final_h - initial_h) * (final_w - initial_w));
+    const Uint32 *p = surface->pixels;
+
+    Uint32 sum_r = 0, sum_g = 0, sum_b = 0;
+    SDL_Color color;
+
+    for (i = initial_h; i < final_h; i++)
+        for(j = initial_w; j < final_w; j++)
+        {
+            SDL_GetRGB(p[i * surface->w + j], surface->format, &color.r, &color.g, &color.b);
+            sum_r += color.r;
+            sum_g += color.g;
+            sum_b += color.b;
+        }
+
+    return SDL_MapRGB(surface->format, sum_r / nb_pixel, sum_g / nb_pixel, sum_b / nb_pixel);
+}
+
+void surface_to_flou(SDL_Surface* surface)
+{
+    Uint32* pixels = surface->pixels;
+    int h = surface->h;
+    int w = surface->w;
+    //SDL_PixelFormat* format = surface->format;
+
+    SDL_LockSurface(surface);
+    for (int i = 0;i<h;i++)
+      {
+        for (int j =0; j<w;j++)
+	  {
+	    pixels[i * w + j] = moyenne(surface,i,j,2);
+	  }
+      }
+    SDL_UnlockSurface(surface);
 
 }
+
+
 
 int main(int argc, char** argv)
 {
@@ -186,18 +230,18 @@ int main(int argc, char** argv)
     draw(renderer,texture);
 
     surface_to_grayscale(surface);
-
-    SDL_Texture * texture_gray = SDL_CreateTextureFromSurface(renderer, surface);
-
+    surface_to_flou(surface);
+    surface_to_bin(surface);
+    SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     
     // Dispatches the events.
-    event_loop(renderer,texture,texture_gray);
+    event_loop(renderer,texture,texture_change);
 
     // Destroys the objects.
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    SDL_DestroyTexture(texture_gray);
+    SDL_DestroyTexture(texture_change);
     SDL_DestroyTexture(texture);
     //SDL_DestroySurface(surface);
     SDL_Quit();

@@ -1,8 +1,6 @@
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-
 
 // Updates the display.
 //
@@ -14,36 +12,15 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture)
     SDL_RenderPresent(renderer);
 }
 
-void perform_rotation(SDL_Renderer* renderer, double angle_rotation, SDL_Texture* texture, int w, int h)
-{
-  //SDL_RendererFlip flip = SDL_static_cast<SDL_RendererFlip>(SDL_FLIP_NONE);
-
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-  SDL_RenderClear(renderer);
-
-  SDL_Rect position;
-  SDL_QueryTexture(texture, NULL, NULL, &position.w, &position.h);
-  position.x = w /2 - position.w /2;
-  position.y = h /2 - position.h /2;
-  
-  SDL_Point center = {position.w /2, position.h /2};
-  //rotozoomSurface(surface,angle_rotation,0,1);
-
-  SDL_RenderCopyEx(renderer, texture, NULL, &position, angle_rotation, &center, SDL_FLIP_NONE);
-
-  SDL_RenderPresent(renderer);
-}
-
 // Event loop that calls the relevant event handler.
 //
 // renderer: Renderer to draw on.
 // colored: Texture that contains the colored image.
 // grayscale: Texture that contains the grayscale image.
-void event_loop(SDL_Renderer* renderer,SDL_Texture* texture, int w, int h)
+void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* grayscale)
 {
     SDL_Event event;
-    double angle = 0;
-    double angle_rotation = 25;
+    SDL_Texture* t = colored;
 
     while (1)
     {
@@ -59,15 +36,23 @@ void event_loop(SDL_Renderer* renderer,SDL_Texture* texture, int w, int h)
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                 {
-                    draw(renderer, texture);
+                    draw(renderer, t);
                 }
                 break;
 	case SDL_KEYDOWN:
-	  angle = angle+angle_rotation;
-	  if (angle>=360)
-	    angle-=360;
-	  perform_rotation(renderer, angle,texture, w, h);
-	  break;
+	  if (t == colored)
+	    {
+	      t = grayscale;
+	      draw(renderer,t);
+	      break;
+	    }
+	  else
+	    {
+	      t = colored;
+	      draw(renderer,t);
+	      break;
+	    }
+	  
         }
     }
 }
@@ -87,11 +72,71 @@ SDL_Surface* load_image(const char* path)
 }
 
 
+// Converts a colored pixel into grayscale.
+//
+// pixel_color: Color of the pixel to convert in the RGB format.
+// format: Format of the pixel used by the surface.
+
+
+static Uint32 moyenne(SDL_Surface *surface, int i, int j, int n)
+{
+    const int initial_h = SDL_max(i - n, 0);
+    const int initial_w = SDL_max(j - n, 0);
+    const int final_h = SDL_min(i + n, surface->h - 1);
+    const int final_w = SDL_min(j + n, surface->w - 1);
+    const int nb_pixel = ((final_h - initial_h) * (final_w - initial_w));
+    const Uint32 *p = surface->pixels;
+
+    Uint32 sum_r = 0, sum_g = 0, sum_b = 0;
+    SDL_Color color;
+
+    for (i = initial_h; i < final_h; i++)
+        for(j = initial_w; j < final_w; j++)
+        {
+            SDL_GetRGB(p[i * surface->w + j], surface->format, &color.r, &color.g, &color.b);
+            sum_r += color.r;
+            sum_g += color.g;
+            sum_b += color.b;
+        }
+
+    return SDL_MapRGB(surface->format, sum_r / nb_pixel, sum_g / nb_pixel, sum_b / nb_pixel);
+}
+
+void surface_to_flou(SDL_Surface* surface)
+{
+    Uint32* pixels = surface->pixels;
+    int h = surface->h;
+    int w = surface->w;
+    //SDL_PixelFormat* format = surface->format;
+
+    SDL_LockSurface(surface);
+    for (int i = 0;i<h;i++)
+      {
+        for (int j =0; j<w;j++)
+	  {
+	    pixels[i * w + j] = moyenne(surface,i,j,1);
+	  }
+      }
+    SDL_UnlockSurface(surface);
+
+    //int w= surface->w;
+    //int h = surface->h;
+
+    //for(int i = 0; i < h; i++)
+    // {
+    //for(int j = 0; j < w; j++)
+    //	  {
+    //	    Uint32 color = SDL_GetRGB(pixels[i*w+j, s->format, &r, &g, &b);
+    //	    pixels[i * w + j] = SDL_MapRGB(s->format, 255 - color.r, 255 - color.g, 255 - color.b);
+    //	  }
+    //}
+
+}
 
 int main(int argc, char** argv)
 {
     // Checks the number of arguments.
-    if (argc != 3)
+    if (argc != 2)
         errx(EXIT_FAILURE, "Usage: image-file");
 
     // TODO:
@@ -126,23 +171,26 @@ int main(int argc, char** argv)
       errx(EXIT_FAILURE,"%s", SDL_GetError());
 
 
-    int w = surface->w;
-    int h = surface->h;
-    SDL_SetWindowSize(window, w,h);
+    SDL_SetWindowSize(window, surface->w,surface->h);
 
     SDL_Texture* texture = IMG_LoadTexture(renderer, argv[1]);
     if (texture == NULL)
       errx(EXIT_FAILURE,"%s", SDL_GetError());
     draw(renderer,texture);
 
-    
+    surface_to_flou(surface);
+
+    SDL_Texture * texture_flou = SDL_CreateTextureFromSurface(renderer, surface);
+
+    SDL_FreeSurface(surface);
     
     // Dispatches the events.
-    event_loop(renderer,texture, w, h);
+    event_loop(renderer,texture,texture_flou);
 
     // Destroys the objects.
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_DestroyTexture(texture_flou);
     SDL_DestroyTexture(texture);
     //SDL_DestroySurface(surface);
     SDL_Quit();
