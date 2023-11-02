@@ -6,9 +6,9 @@ CFLAGS = -Wall -Wextra -O3 `pkg-config --cflags sdl2 SDL2_image`
 LDFLAGS =
 LDLIBS = `pkg-config --libs sdl2 SDL2_image`
 
-all: display grayscale rotation luminance flou filtres
+all: display grayscale rotation luminance flou filtres reducBruit nonMaxima seuillageContours
 
-SRC = display.c TraitementImage/grayscale.c rotation.c TraitementImage/luminance.c TraitementImage/flou.c filtres.c
+SRC = display.c TraitementImage/grayscale.c rotation.c TraitementImage/luminance.c TraitementImage/flou.c filtres.c reducBruit.c nonMaxima.c seuillageContours.C
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
@@ -18,6 +18,9 @@ rotation: rotation.o
 luminance: luminance.o
 flou: flou.o
 filtres: filtres.o
+reducBruit: reducBruit.o
+nonMaxima: nonMaxima.o
+seuillageContours: seuillageContours.o
 
 .PHONY: clean
 
