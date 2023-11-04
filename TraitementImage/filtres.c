@@ -107,12 +107,13 @@ Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
 {
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
+    printf("R = %d, G = %d, B = %d",r, g, b);
 
     Uint8 average = 0.3*r + 0.59*g + 0.11*b;
 
     Uint32 color;
 
-    if(average>=85)
+    if(average>=150)
       {
 	color = SDL_MapRGB(format,0, 0, 0);
       }
@@ -182,34 +183,40 @@ void surface_to_flou(SDL_Surface* surface)
 
 }
 
-// Fonction pour calculer la moyenne mobile sur une image
 void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
-    int fenetre = 3; // Taille de la fenêtre de moyenne mobile
+    int fenetre = 3;
 
-    for (int i = 0; i < image->h; i++) {
-        for (int j = 0; j < image->w; j++) {
-            int sommeR = 0, sommeG = 0, sommeB = 0, pixelCount = 0;
+    for (int i = 0; i < image->h; i++)
+    {
+        for (int j = 0; j < image->w; j++)
+        {
+            int sommeR = 0;
+            int sommeG = 0;
+            int sommeB = 0;
+            int pixelCount = 0;
 
-            for (int k = -fenetre / 2; k <= fenetre / 2; k++) {
-                for (int l = -fenetre / 2; l <= fenetre / 2; l++) {
-                    int x = j + l;
-                    int y = i + k;
+            for (int k = -fenetre / 2; k <= fenetre / 2; k++)
+            {
+                for (int l = -fenetre / 2; l <= fenetre / 2; l++)
+                {
+                    int posx = j + l;
+                    int posy = i + k;
 
-                    if (x >= 0 && x < image->w && y >= 0 && y < image->h) {
-                        Uint32 pixel = ((Uint32 *)image->pixels)[y * image->w + x];
-                        sommeR += pixel & 0xFF;
-                        sommeG += (pixel >> 8) & 0xFF;
-                        sommeB += (pixel >> 16) & 0xFF;
+                    if (posx >= 0 && posx < image->w && posy >= 0 && posy < image->h)
+                    {
+                        Uint32 pixel = ((Uint32 *)image->pixels)[posy * image->w + posx];
+                        sommeR += pixel %256;
+                        sommeG += (pixel >> 8) %256;
+                        sommeB += (pixel >> 16) %256;
                         pixelCount++;
                     }
                 }
             }
-
             Uint8 avgR = sommeR / pixelCount;
             Uint8 avgG = sommeG / pixelCount;
             Uint8 avgB = sommeB / pixelCount;
-
-            ((Uint32 *)resultat->pixels)[i * resultat->w + j] = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000;
+            valeurPixel = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000
+            resultat.pixels[i * resultat.w + j] = valeurPixel
         }
     }
 }
@@ -219,7 +226,7 @@ void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
 int main(int argc, char** argv)
 {
     // Checks the number of arguments.
-    if (argc != 2)
+    if (argc != 3)
         errx(EXIT_FAILURE, "Usage: image-file");
 
     // TODO:
@@ -268,6 +275,10 @@ int main(int argc, char** argv)
     surface_to_bin(resultatSurface);
     
     SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, resultatSurface);
+
+    SDL_SaveBMP(resultatSurface, argv[2]);
+
+
     SDL_FreeSurface(surface);
     SDL_FreeSurface(resultatSurface);
     

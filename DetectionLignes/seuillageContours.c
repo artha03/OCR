@@ -172,7 +172,7 @@ SDL_Surface* load_image(const char* path)
     return image_;
 }
 
-void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* change,SDL_Window* window)
+void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* change)
 {
     SDL_Event event;
     SDL_Texture* t = colored;
@@ -194,22 +194,19 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* chang
                     draw(renderer, t);
                 }
                 break;
-	case SDL_KEYDOWN:
-	  if (t == colored)
-	    {
-	      t = change;
-	      SDL_RenderClear(renderer);
-	      SDL_Renderer *rendererBlanc = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	      SDL_SetRenderDrawColor(rendererBlanc, 255, 255, 255, 255);
-	      draw(rendererBlanc,t);
-	      break;
-	    }
-	  else
-	    {
-	      t = colored;
-	      draw(renderer,t);
-	      break;
-	    }
+	        case SDL_KEYDOWN:
+	            if (t == colored)
+	            {
+	                t = change;
+	                draw(renderer,t);
+	                break;
+	            }
+	            else
+	            {
+	                t = colored;
+	                draw(renderer,t);
+	                break;
+	            }
 	  
         }
     }
@@ -360,24 +357,24 @@ int main(int argc,char ** argv) {
     // Supprimer les non-maxima
     supprimerNonMaxima(gradients, resultatFinal, w, h);
     // Afficher les valeurs dans le tableau resultatFinal
-    printf("\nRésultat après suppression des non-maxima:\n");
-    for (int y = 0; y < h; y++) {
-    for (int x = 0; x < w; x++) {
-    	int index = y * w + x;
-    	printf("%d ", resultatFinal[index]);
-    }
-    printf("\n");
-    }
+    //printf("\nRésultat après suppression des non-maxima:\n");
+    //for (int y = 0; y < h; y++) {
+    //for (int x = 0; x < w; x++) {
+    //	int index = y * w + x;
+    //	printf("%d ", resultatFinal[index]);
+    //}
+    //printf("\n");
+    //}
 
     // Afficher l'image résultante
     //SDL_Surface *resultatSurface = SDL_CreateRGBSurfaceFrom(resultatFinal, surface->w, surface->h, 32, 0, 0, 0, 0);
-    SDL_Surface *resultatSurface = SDL_CreateRGBSurfaceFrom(resultatFinal, surface->w, surface->h, 32, surface->w*4,0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    SDL_Surface *resultatSurface = SDL_CreateRGBSurfaceFrom(resultatFinal, surface->w, surface->h, 32,surface->w*4,0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
     
     SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, resultatSurface);
 
     // Attendre une touche pour fermer la fenêtre
     // Dispatches the events.
-    event_loop(renderer,texture,texture_change,window);
+    event_loop(renderer,texture,texture_change);
 
     // Libérer les ressources SDL
     SDL_DestroyTexture(texture);

@@ -44,43 +44,49 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* chang
                     draw(renderer, t);
                 }
                 break;
-	case SDL_KEYDOWN:
-	  if (t == colored)
-	    {
-	      t = change;
-	      draw(renderer,t);
-	      break;
-	    }
-	  else
-	    {
-	      t = colored;
-	      draw(renderer,t);
-	      break;
-	    }
-	  
+	        case SDL_KEYDOWN:
+	            if (t == colored)
+                {
+	                t = change;
+	                draw(renderer,t);
+	                break;
+	            }
+	            else
+	            {
+	                t = colored;
+	                draw(renderer,t);
+	                break;
+	            }
         }
     }
 }
 
 
-// Fonction pour calculer la moyenne mobile sur une image
 void moyenneMobileImage(SDL_Surface *image, SDL_Surface *resultat) {
-    int fenetre = 3; // Taille de la fenêtre de moyenne mobile
+    int fenetre = 3;
 
-    for (int i = 0; i < image->h; i++) {
-        for (int j = 0; j < image->w; j++) {
-            int sommeR = 0, sommeG = 0, sommeB = 0, pixelCount = 0;
+    for (int i = 0; i < image->h; i++)
+    {
+        for (int j = 0; j < image->w; j++)
+        {
+            int sommeR = 0;
+            int sommeG = 0;
+            int sommeB = 0;
+            int pixelCount = 0;
 
-            for (int k = -fenetre / 2; k <= fenetre / 2; k++) {
-                for (int l = -fenetre / 2; l <= fenetre / 2; l++) {
-                    int x = j + l;
-                    int y = i + k;
+            for (int k = -fenetre / 2; k <= fenetre / 2; k++)
+            {
+                for (int l = -fenetre / 2; l <= fenetre / 2; l++)
+                {
+                    int posx = j + l;
+                    int posy = i + k;
 
-                    if (x >= 0 && x < image->w && y >= 0 && y < image->h) {
-                        Uint32 pixel = ((Uint32 *)image->pixels)[y * image->w + x];
-                        sommeR += pixel & 0xFF;
-                        sommeG += (pixel >> 8) & 0xFF;
-                        sommeB += (pixel >> 16) & 0xFF;
+                    if (posx >= 0 && posx < image->w && posy >= 0 && posy < image->h)
+                    {
+                        Uint32 pixel = ((Uint32 *)image->pixels)[posy * image->w + posx];
+                        sommeR += pixel %256;
+                        sommeG += (pixel >> 8) %256;
+                        sommeB += (pixel >> 16) %256;
                         pixelCount++;
                     }
                 }
@@ -90,13 +96,15 @@ void moyenneMobileImage(SDL_Surface *image, SDL_Surface *resultat) {
             Uint8 avgG = sommeG / pixelCount;
             Uint8 avgB = sommeB / pixelCount;
 
-            ((Uint32 *)resultat->pixels)[i * resultat->w + j] = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000;
+            valeurPixel = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000
+            resultat.pixels[i * resultat.w + j] = valeurPixel;
         }
     }
 }
 
 
-int main(int argc,char** argv) {
+int main(int argc,char** argv)
+{
       // Checks the number of arguments.
     if (argc != 2)
         errx(EXIT_FAILURE, "Usage: image-file");

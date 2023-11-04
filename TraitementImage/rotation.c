@@ -39,11 +39,11 @@ void perform_rotation(SDL_Renderer* renderer, double angle_rotation, SDL_Texture
 // renderer: Renderer to draw on.
 // colored: Texture that contains the colored image.
 // grayscale: Texture that contains the grayscale image.
-void event_loop(SDL_Renderer* renderer,SDL_Texture* texture, int w, int h)
+void event_loop(SDL_Renderer* renderer,SDL_Texture* texture, int w, int h,double angle_rotation)
 {
     SDL_Event event;
     double angle = 0;
-    double angle_rotation = 25;
+    //double angle_rotation = 25;
 
     while (1)
     {
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 {
     // Checks the number of arguments.
     if (argc != 3)
-        errx(EXIT_FAILURE, "Usage: image-file");
+        errx(EXIT_FAILURE, "Usage: image-file angle");
 
     // TODO:
     // - Initialize the SDL.
@@ -138,7 +138,8 @@ int main(int argc, char** argv)
     
     
     // Dispatches the events.
-    event_loop(renderer,texture, w, h);
+    double angle_rotation =  *argv[2];
+    event_loop(renderer,texture, w, h, angle_rotation);
 
     // Destroys the objects.
     SDL_DestroyRenderer(renderer);
