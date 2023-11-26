@@ -137,14 +137,20 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
         }
     }
 
-        for (int rho = 0; rho < maxDist; ++rho)
+    double thresholdPercentage = 0.4;  // Ajustez ce pourcentage selon vos besoins
+
+
+    for (int rho = 0; rho < maxDist; ++rho)
+    {
+        for (int theta = 0; theta < thetaRes; ++theta)
         {
-            for (int theta = 0; theta < thetaRes; ++theta)
+            if (accumulator[rho][theta] > maxAccumulatorValue * thresholdPercentage)
             {
-                //printf("accumulator[rho][theta] = %d\n",accumulator[rho][theta]);
-                if (accumulator[rho][theta] > maxAccumulatorValue *0.7)
+                double radians = theta * M_PI / 180.0;
+
+                // Filtrer les lignes verticales ou horizontales
+                if (fabs(cos(radians)) < 0.01 || fabs(sin(radians)) < 0.01)
                 {
-                    double radians = theta * M_PI / 180.0;
                     double a = cos(radians);
                     double b = sin(radians);
                     double x0 = a * (rho - maxDist / 2);
@@ -153,10 +159,14 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
 
 
                     SDL_DrawLine(cannyImage, (int)(x0 - scale * b), (int)(y0 + scale * a),(int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
+                    // Ajouter une impression pour le débogage
+                    printf("Ligne détectée - rho: %d, theta: %d\n", rho, theta);
                 }
-
             }
         }
+    }
+
+
     for (int i = 0; i < maxDist; ++i)
     {
         free(accumulator[i]);

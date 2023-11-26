@@ -4,11 +4,10 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define SOBEL_THRESHOLD 20
+#define SOBEL_THRESHOLD 50
 #define HIGH_THRESHOLD 50
 #define LOW_THRESHOLD 20
 
-// Fonction de convolution pour le filtre de Sobel
 double convolution(SDL_Surface *image, int x, int y, int kernel[3][3]) {
     double result = 0.0;
     for (int i = -1; i <= 1; i++) {
@@ -21,7 +20,6 @@ double convolution(SDL_Surface *image, int x, int y, int kernel[3][3]) {
     return result;
 }
 
-// Applique le filtre de Sobel pour détecter les contours
 void applySobel(SDL_Surface *image) {
     int sobelX[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
     int sobelY[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
@@ -47,7 +45,6 @@ void applySobel(SDL_Surface *image) {
     SDL_FreeSurface(temp);
 }
 
-// Compare l'intensité du pixel avec ses voisins le long de la direction du gradient
 void compareNeighbors(SDL_Surface *gradient, SDL_Surface *image, int x, int y, int dx, int dy) {
     Uint8 *center = (Uint8 *)gradient->pixels + y * gradient->pitch + x * 4;
     Uint8 *neighbor1 = (Uint8 *)gradient->pixels + (y + dy) * gradient->pitch + (x + dx) * 4;
@@ -58,13 +55,13 @@ void compareNeighbors(SDL_Surface *gradient, SDL_Surface *image, int x, int y, i
     Uint8 *neighbor2Pixel = (Uint8 *)image->pixels + (y - dy) * image->pitch + (x - dx) * 4;
 
     if (center[0] < neighbor1[0] || center[0] < neighbor2[0]) {
-        centerPixel[0] = centerPixel[1] = centerPixel[2] = 0; // Suppression du faux positif
+        centerPixel[0] = centerPixel[1] = centerPixel[2] = 0;
     } else {
-        centerPixel[0] = centerPixel[1] = centerPixel[2] = 255; // Contour potentiel
+        centerPixel[0] = centerPixel[1] = centerPixel[2] = 255;
     }
 }
 
-// Suppression des faux positifs (non-maxima suppression)
+
 void applyNonMaxSuppression(SDL_Surface *gradient, SDL_Surface *image) {
     for (int y = 1; y < gradient->h - 1; y++) {
         for (int x = 1; x < gradient->w - 1; x++) {
@@ -85,7 +82,6 @@ void applyNonMaxSuppression(SDL_Surface *gradient, SDL_Surface *image) {
 }
 
 
-// Applique l'hystérésis pour connecter les contours
 void applyHysteresis(SDL_Surface *image) {
     for (int y = 1; y < image->h - 1; y++) {
         for (int x = 1; x < image->w - 1; x++) {
@@ -95,7 +91,7 @@ void applyHysteresis(SDL_Surface *image) {
                     for (int j = -1; j <= 1; j++) {
                         Uint8 *neighbor = (Uint8 *)image->pixels + (y + i) * image->pitch + (x + j) * 4;
                         if (neighbor[0] == 255) {
-                            pixel[0] = pixel[1] = pixel[2] = 255; // Contour connecté
+                            pixel[0] = pixel[1] = pixel[2] = 255;
                         }
                     }
                 }
@@ -122,10 +118,10 @@ int main(int argc, char *argv[]) {
 
     SDL_Surface *gradient = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
     applySobel(image);
-    applyNonMaxSuppression(gradient, image);
-    applyHysteresis(image);
+    //applyNonMaxSuppression(gradient, image);
+    //applyHysteresis(image);
 
-    SDL_SaveBMP(image, argv[2]); // Le dernier paramètre (100) est la qualité de compression
+    SDL_SaveBMP(image, argv[2]);
 
     SDL_FreeSurface(image);
     SDL_FreeSurface(gradient);

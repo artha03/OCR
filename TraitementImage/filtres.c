@@ -107,7 +107,7 @@ Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
 {
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
-    printf("R = %d, G = %d, B = %d",r, g, b);
+    //printf("R = %d, G = %d, B = %d",r, g, b);
 
     Uint8 average = 0.3*r + 0.59*g + 0.11*b;
 
@@ -215,8 +215,7 @@ void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
             Uint8 avgR = sommeR / pixelCount;
             Uint8 avgG = sommeG / pixelCount;
             Uint8 avgB = sommeB / pixelCount;
-            valeurPixel = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000
-            resultat.pixels[i * resultat.w + j] = valeurPixel
+            ((Uint32 *)resultat->pixels)[i * resultat->w + j] = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000;
         }
     }
 }
