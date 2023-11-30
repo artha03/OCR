@@ -79,7 +79,8 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
 
 void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
 {
-    int maxDist = (int)sqrt(cannyImage->w * cannyImage->w + cannyImage->h * cannyImage->h);
+    //int maxDist = (int)sqrt(cannyImage->w * cannyImage->w + cannyImage->h * cannyImage->h);
+    int maxDist = cannyImage->w + cannyImage->h;
     int thetaRes = 180;
     //int accumulator[maxDist][thetaRes];
 
@@ -155,12 +156,12 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                     double b = sin(radians);
                     double x0 = a * (rho - maxDist / 2);
                     double y0 = b * (rho - maxDist / 2);
-                    double scale = 1000.0;
+                    double scale = 2000.0;
 
 
                     SDL_DrawLine(cannyImage, (int)(x0 - scale * b), (int)(y0 + scale * a),(int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
                     // Ajouter une impression pour le débogage
-                    printf("Ligne détectée - rho: %d, theta: %d\n", rho, theta);
+                    //printf("Ligne détectée - rho: %d, theta: %d\n", rho, theta);
                 }
             }
         }

@@ -1,6 +1,9 @@
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 // Updates the display.
 //
@@ -76,7 +79,7 @@ SDL_Surface* load_image(const char* path)
 //
 // pixel_color: Color of the pixel to convert in the RGB format.
 // format: Format of the pixel used by the surface.
-
+/*
 Uint32 pixel_to_grayscale(Uint32 pixel_color, SDL_PixelFormat* format)
 {
     Uint8 r, g, b;
@@ -101,9 +104,166 @@ void surface_to_grayscale(SDL_Surface* surface)
 	pixels[i] = pixel_to_grayscale(pixels[i],format);
       }
     SDL_UnlockSurface(surface);
+}*/
+
+void convertToGray(SDL_Surface *image) {
+    for (int y = 0; y < image->h; ++y) {
+        for (int x = 0; x < image->w; ++x) {
+            Uint32 pixel = *((Uint32*)image->pixels + y * image->w + x);
+            Uint8 r, g, b, a;
+            SDL_GetRGBA(pixel, image->format, &r, &g, &b, &a);
+            Uint8 gray = 0.3 * r + 0.59 * g + 0.11 * b;
+            *((Uint32*)image->pixels + y * image->w + x) = SDL_MapRGBA(image->format, gray, gray, gray, a);
+        }
+    }
 }
 
-Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
+/*
+double calculateEntropy(int histogram[], int start, int end) {
+    double entropy = 0.0;
+    int totalPixels = 0;
+
+    for (int i = start; i <= end; ++i) {
+        totalPixels += histogram[i];
+    }
+
+    for (int i = start; i <= end; ++i) {
+        double probability = (double)histogram[i] / totalPixels;
+        if (probability > 0.0) {
+            entropy -= probability * log2(probability);
+        }
+    }
+
+    return entropy;
+}
+
+int findAdaptiveThreshold(SDL_Surface *surface, int windowSize) {
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+    int width = surface->w;
+    int height = surface->h;
+
+    int histogram[256] = {0};
+    int totalPixels = width * height;
+
+    // Calcul de l'histogramme initial
+    for (int i = 0; i < totalPixels; ++i) {
+        Uint8 r, g, b;
+        SDL_GetRGB(pixels[i], surface->format, &r, &g, &b);
+        int gray = (int)(0.3 * r + 0.59 * g + 0.11 * b);
+        histogram[gray]++;
+    }
+
+    int adaptiveThreshold = 0;
+
+    // Calcul du seuil initial
+    for (int i = 0; i < 256; ++i) {
+        adaptiveThreshold += i * histogram[i];
+    }
+    adaptiveThreshold /= totalPixels;
+
+    // Binarisation basée sur l'entropie
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            int sum = 0;
+            int count = 0;
+
+            for (int i = -windowSize; i <= windowSize; ++i) {
+                for (int j = -windowSize; j <= windowSize; ++j) {
+                    int nx = x + i;
+                    int ny = y + j;
+
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        Uint8 r, g, b;
+                        SDL_GetRGB(pixels[ny * width + nx], surface->format, &r, &g, &b);
+                        int gray = (int)(0.3 * r + 0.59 * g + 0.11 * b);
+                        sum += gray;
+                        count++;
+                    }
+                }
+            }
+
+            int localMean = sum / count;
+
+            double entropyForeground = calculateEntropy(histogram, 0, localMean);
+            double entropyBackground = calculateEntropy(histogram, localMean + 1, 255);
+
+            // Calcul du seuil basé sur l'entropie
+            adaptiveThreshold = (int)((entropyForeground + entropyBackground) / 0.06);
+        }
+    }
+
+    return adaptiveThreshold;
+}*/
+////////////
+// Fonction pour calculer l'histogramme d'une image en niveaux de gris
+void calculateHistogram(SDL_Surface* image, double histogram[256])
+{
+    SDL_LockSurface(image);
+
+    const int totalPixels = image->w * image->h;
+
+    for (int i = 0; i < 256; ++i) {
+        histogram[i] = 0.0;
+    }
+
+    for (int y = 0; y < image->h; ++y) {
+        for (int x = 0; x < image->w; ++x) {
+            Uint8 pixelValue = ((Uint8*)image->pixels)[y * image->pitch + x];
+            histogram[pixelValue]++;
+        }
+    }
+
+    for (int i = 0; i < 256; ++i) {
+        histogram[i] /= totalPixels;
+    }
+
+    SDL_UnlockSurface(image);
+}
+
+// Fonction pour calculer la valeur du seuil d'Otsu
+int calculateOtsuThreshold(SDL_Surface * surface ,double histogram[256])
+{
+    const int numBins = 256;
+    const int totalPixels = surface->w * surface->h; // Remplacez ces valeurs par les dimensions de votre image
+
+    double sum = 0.0;
+    for (int i = 0; i < numBins; ++i) {
+        sum += i * histogram[i];
+    }
+
+    double sumB = 0.0;
+    double wB = 0.0;
+    double wF = 0.0;
+
+    double varMax = 0.0;
+    int threshold = 0;
+
+    for (int i = 0; i < numBins; ++i) {
+        wB += histogram[i];
+        if (wB == 0.0)
+            continue;
+
+        wF = 1.0 - wB;
+        if (wF == 0.0)
+            break;
+
+        sumB += i * histogram[i];
+
+        double mB = sumB / (wB * totalPixels);
+        double mF = (sum - sumB) / (wF * totalPixels);
+
+        double varBetween = wB * wF * (mB - mF) * (mB - mF);
+
+        if (varBetween > varMax) {
+            varMax = varBetween;
+            threshold = i;
+        }
+    }
+
+    return threshold;
+}
+
+Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format,int threshold)
 {
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
@@ -113,7 +273,7 @@ Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
 
     Uint32 color;
 
-    if(average>=150)
+    if(average>=threshold)
       {
 	color = SDL_MapRGB(format,0, 0, 0);
       }
@@ -132,9 +292,16 @@ void surface_to_bin(SDL_Surface* surface)
     SDL_PixelFormat* format = surface->format;
 
     SDL_LockSurface(surface);
+
+    double histogram[256] = {0};
+    // Calcul de l'histogramme initial
+    calculateHistogram(surface, histogram);
+
+    int threshold = calculateOtsuThreshold(surface,histogram);
+
     for (int i = 0;i<len;i++)
       {
-	pixels[i] = pixel_to_bin(pixels[i],format);
+	    pixels[i] = pixel_to_bin(pixels[i],format,threshold);
       }
     SDL_UnlockSurface(surface);
 
@@ -221,6 +388,44 @@ void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
 }
 
 
+void applySharpenFilter(SDL_Surface *image) {
+    if (SDL_LockSurface(image) == 0) {
+        Uint32 *pixels = (Uint32 *)image->pixels;
+        int pitch = image->pitch / sizeof(Uint32);
+        int width = image->w;
+        int height = image->h;
+
+        // Créer une copie temporaire de l'image
+        Uint32 *tempPixels = malloc(image->pitch * image->h);
+        memcpy(tempPixels, pixels, image->pitch * image->h);
+
+        // Appliquer le filtre de netteté
+        for (int y = 1; y < height - 1; ++y) {
+            for (int x = 1; x < width - 1; ++x) {
+                Uint8 *center = (Uint8 *)&tempPixels[y * pitch + x];
+                Uint8 *up = (Uint8 *)&pixels[(y - 1) * pitch + x];
+                Uint8 *down = (Uint8 *)&pixels[(y + 1) * pitch + x];
+                Uint8 *left = (Uint8 *)&pixels[y * pitch + x - 1];
+                Uint8 *right = (Uint8 *)&pixels[y * pitch + x + 1];
+
+                for (int i = 0; i < 3; ++i) {
+                    center[i] = center[i] + 5 * center[i] - up[i] - down[i] - left[i] - right[i];
+                    if (center[i] > 255) {
+                        center[i] = 255;
+                    } else if (center[i] < 0) {
+                        center[i] = 0;
+                    }
+                }
+            }
+        }
+
+        // Copier les pixels modifiés vers l'image d'origine
+        memcpy(pixels, tempPixels, image->pitch * image->h);
+
+        SDL_UnlockSurface(image);
+        free(tempPixels);
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -269,20 +474,27 @@ int main(int argc, char** argv)
 
     SDL_Surface *resultatSurface = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0, 0, 0, 0);
     reduction_Bruit(surface,resultatSurface);
-    surface_to_grayscale(resultatSurface);
-    surface_to_flou(resultatSurface);
+    //surface_to_grayscale(resultatSurface);
+    //surface_to_flou(resultatSurface);
+
+
+    convertToGray(resultatSurface);
+    //applySharpenFilter(resultatSurface);
+
+
     surface_to_bin(resultatSurface);
     
     SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, resultatSurface);
 
     SDL_SaveBMP(resultatSurface, argv[2]);
 
+    // Dispatches the events.
+    event_loop(renderer,texture,texture_change);
 
     SDL_FreeSurface(surface);
     SDL_FreeSurface(resultatSurface);
     
-    // Dispatches the events.
-    event_loop(renderer,texture,texture_change);
+
 
     // Destroys the objects.
     SDL_DestroyRenderer(renderer);

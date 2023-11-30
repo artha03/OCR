@@ -19,7 +19,31 @@ double convolution(SDL_Surface *image, int x, int y, int kernel[3][3]) {
     }
     return result;
 }
+/*
+void applySobel(SDL_Surface *image) {
+    int sobelX[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
+    int sobelY[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
 
+    SDL_Surface *temp = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_RGBA32, 0);
+
+    for (int y = 1; y < image->h - 1; y++) {
+        for (int x = 1; x < image->w - 1; x++) {
+            double Gx = convolution(temp, x, y, sobelX);
+            double Gy = convolution(temp, x, y, sobelY);
+            double gradient = sqrt(Gx * Gx + Gy * Gy);
+
+            if (gradient > SOBEL_THRESHOLD) {
+                Uint8 *pixel = (Uint8 *)image->pixels + y * image->pitch + x * 4;
+                pixel[0] = pixel[1] = pixel[2] = 255; // Blanc
+            } else {
+                Uint8 *pixel = (Uint8 *)image->pixels + y * image->pitch + x * 4;
+                pixel[0] = pixel[1] = pixel[2] = 0; // Noir
+            }
+        }
+    }
+
+    SDL_FreeSurface(temp);
+}*/
 void applySobel(SDL_Surface *image) {
     int sobelX[3][3] = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
     int sobelY[3][3] = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};
@@ -116,7 +140,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    SDL_Surface *gradient = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+    //SDL_Surface *gradient = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
     applySobel(image);
     //applyNonMaxSuppression(gradient, image);
     //applyHysteresis(image);
@@ -124,7 +148,7 @@ int main(int argc, char *argv[]) {
     SDL_SaveBMP(image, argv[2]);
 
     SDL_FreeSurface(image);
-    SDL_FreeSurface(gradient);
+    //SDL_FreeSurface(gradient);
     IMG_Quit();
     SDL_Quit();
 
