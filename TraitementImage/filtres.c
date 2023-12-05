@@ -343,11 +343,34 @@ void surface_to_flou(SDL_Surface* surface)
       {
         for (int j =0; j<w;j++)
 	  {
-	    pixels[i * w + j] = moyenne(surface,i,j,2);
+	    pixels[i * w + j] = moyenne(surface,i,j,3);
 	  }
       }
     SDL_UnlockSurface(surface);
+}
 
+Uint8 f(Uint8 c, double n)
+{
+    if(c <= 255 / 2)
+        return (Uint8)( (255/2) * SDL_pow((double) 2 * c / 255, n));
+    else
+        return 255 - f(255 - c, n);
+}
+
+void contrast(SDL_Surface * image)
+{
+    Uint8 * pixels = image->pixels;
+    int len = image->w * image->h;
+    //SDL_PixelFormat* format = image->format;
+
+    SDL_LockSurface(image);
+
+
+    for (int i = 0;i<len*4;i++)
+    {
+        pixels[i] = f(pixels[i],3);
+    }
+    SDL_UnlockSurface(image);
 }
 
 void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
@@ -387,7 +410,7 @@ void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
     }
 }
 
-
+/*
 void applySharpenFilter(SDL_Surface *image) {
     if (SDL_LockSurface(image) == 0) {
         Uint32 *pixels = (Uint32 *)image->pixels;
@@ -410,6 +433,7 @@ void applySharpenFilter(SDL_Surface *image) {
 
                 for (int i = 0; i < 3; ++i) {
                     center[i] = center[i] + 5 * center[i] - up[i] - down[i] - left[i] - right[i];
+
                     if (center[i] > 255) {
                         center[i] = 255;
                     } else if (center[i] < 0) {
@@ -425,7 +449,110 @@ void applySharpenFilter(SDL_Surface *image) {
         SDL_UnlockSurface(image);
         free(tempPixels);
     }
+}*/
+
+// Déclaration de la fonction pour obtenir la couleur d'un pixel
+Uint32 getpixel(SDL_Surface *surface, int x, int y);
+
+// Déclaration de la fonction pour définir la couleur d'un pixel
+void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+
+// Fonction pour appliquer un filtre de lissage à l'image
+void applySmoothingFilter(SDL_Surface *image) {
+    int width = image->w;
+    int height = image->h;
+
+    SDL_Surface *tempSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(image, NULL, tempSurface, NULL);
+
+    for (int y = 1; y < height - 1; ++y) {
+        for (int x = 1; x < width - 1; ++x) {
+            // Apply simple smoothing filter
+            int r = 0, g = 0, b = 0;
+
+            for (int i = -1; i <= 1; ++i) {
+                for (int j = -1; j <= 1; ++j) {
+                    Uint8 tr, tg, tb;
+                    SDL_GetRGB(getpixel(tempSurface, x + i, y + j), tempSurface->format, &tr, &tg, &tb);
+                    r += tr;
+                    g += tg;
+                    b += tb;
+                }
+            }
+
+            r /= 9;
+            g /= 9;
+            b /= 9;
+
+            // S'assurer que les valeurs sont dans la plage 0-255
+            r = (r < 0) ? 0 : (r > 255) ? 255 : r;
+            g = (g < 0) ? 0 : (g > 255) ? 255 : g;
+            b = (b < 0) ? 0 : (b > 255) ? 255 : b;
+
+            // Set the pixel with the smoothed values
+            putpixel(tempSurface, x, y, SDL_MapRGB(tempSurface->format, r, g, b));
+        }
+    }
+
+    SDL_BlitSurface(tempSurface, NULL, image, NULL);
+    SDL_FreeSurface(tempSurface);
 }
+
+// Définition de la fonction pour obtenir la couleur d'un pixel
+Uint32 getpixel(SDL_Surface *surface, int x, int y) {
+    return *(Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel);
+}
+
+// Définition de la fonction pour définir la couleur d'un pixel
+void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel) {
+    *(Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch + x * surface->format->BytesPerPixel) = pixel;
+}
+
+
+/*
+void applySharpnessFilter(SDL_Surface *image) {
+    if (SDL_LockSurface(image) != 0) {
+        SDL_Log("Unable to lock surface: %s\n", SDL_GetError());
+        return;
+    }
+
+    int width = image->w;
+    int height = image->h;
+    Uint32 *pixels = (Uint32 *)image->pixels;
+
+    Uint32 *newPixels = malloc(width * height * sizeof(Uint32));
+    if (newPixels == NULL) {
+        SDL_Log("Memory allocation failed\n");
+        SDL_UnlockSurface(image);
+        return;
+    }
+
+    // Appliquer le filtre de netteté
+    for (int y = 1; y < height - 1; ++y) {
+        for (int x = 1; x < width - 1; ++x) {
+            // Noyau de filtre de netteté simple avec pondération pour atténuer le bruit
+            int sum = 5 * ((pixels[y * width + x] >> 16) & 0xFF) -
+                      ((pixels[(y - 1) * width + x] >> 16) & 0xFF) -
+                      ((pixels[(y + 1) * width + x] >> 16) & 0xFF) -
+                      ((pixels[y * width + x - 1] >> 16) & 0xFF) -
+                      ((pixels[y * width + x + 1] >> 16) & 0xFF);
+
+            // Ajouter une pondération pour atténuer le bruit
+            int originalRed = (pixels[y * width + x] >> 16) & 0xFF;
+            sum = originalRed + 0.6 * sum;
+            sum = sum < 0 ? 0 : (sum > 255 ? 255 : sum);
+
+            // Mettre à jour le pixel dans la nouvelle image
+            newPixels[y * width + x] = (pixels[y * width + x] & 0xFF000000) | (sum << 16) | (sum << 8) | sum;
+        }
+    }
+
+    // Copier les pixels modifiés dans l'image d'origine
+    memcpy(pixels, newPixels, width * height * sizeof(Uint32));
+
+    SDL_UnlockSurface(image);
+    free(newPixels);
+}*/
 
 int main(int argc, char** argv)
 {
@@ -473,16 +600,21 @@ int main(int argc, char** argv)
     draw(renderer,texture);
 
     SDL_Surface *resultatSurface = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0, 0, 0, 0);
-    reduction_Bruit(surface,resultatSurface);
+
     //surface_to_grayscale(resultatSurface);
     //surface_to_flou(resultatSurface);
 
+    //applySharpnessFilter(surface);
+    //contrast(surface);
 
+    //applySmoothingFilter(surface);
+    reduction_Bruit(surface,resultatSurface);
+    //contrast(resultatSurface);
     convertToGray(resultatSurface);
-    //applySharpenFilter(resultatSurface);
 
 
     surface_to_bin(resultatSurface);
+
     
     SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, resultatSurface);
 

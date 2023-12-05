@@ -138,7 +138,7 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
         }
     }
 
-    double thresholdPercentage = 0.4;  // Ajustez ce pourcentage selon vos besoins
+    double thresholdPercentage = 0.35;  // Ajustez ce pourcentage selon vos besoins
 
 
     for (int rho = 0; rho < maxDist; ++rho)
@@ -150,7 +150,7 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                 double radians = theta * M_PI / 180.0;
 
                 // Filtrer les lignes verticales ou horizontales
-                if (fabs(cos(radians)) < 0.01 || fabs(sin(radians)) < 0.01)
+                if (fabs(cos(radians)) < 0.1 || fabs(sin(radians)) < 0.1)
                 {
                     double a = cos(radians);
                     double b = sin(radians);

@@ -1,6 +1,8 @@
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL2_rotozoom.h>
+
 
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 {
@@ -31,6 +33,7 @@ void perform_rotation(SDL_Renderer* renderer, double angle_rotation, SDL_Texture
     SDL_RenderPresent(renderer);
     //c = center;
 }
+
 
 void event_loop(SDL_Renderer* renderer, SDL_Texture* texture, int w, int h, int new_width, int new_height, double angle_rotation,int c)
 {
@@ -76,7 +79,7 @@ SDL_Surface* load_image(const char* path)
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 4)
         errx(EXIT_FAILURE, "Usage: image-file angle");
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -85,7 +88,7 @@ int main(int argc, char** argv)
     SDL_Window* window = SDL_CreateWindow("Rotating Resizable Image", 0, 0, 800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-int c = 400;
+    //int c = 400;
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
@@ -104,11 +107,19 @@ int c = 400;
     if (texture == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
+
+    /*
     draw(renderer, texture);
 
-    double angle_rotation = atof(argv[2]);
+
 
     event_loop(renderer, texture, w, h, w, h, angle_rotation,c);
+    //perform_rotation(renderer,angle_rotation,texture,w,h,w,h,c);
+
+     */
+    double angle_rotation = atof(argv[2]);
+    SDL_Surface * resultatSurface = rotozoomSurface(surface, angle_rotation, 1.0, 0);
+    SDL_SaveBMP(resultatSurface, argv[3]);
 
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);

@@ -6,9 +6,9 @@ CFLAGS =
 LDFLAGS =
 LDLIBS = -lSDL2 -lSDL2_image -lm
 
-all: transformeeHough transformeeHough2 transformeeHough3 filtreCanny HoughTransform
+all: transformeeHough transformeeHough2 transformeeHough3 filtreCanny HoughTransform dec
 
-SRC = transformeeHough.c transformeeHough2.c transformeeHough3.c filtreCanny.c HoughTransform.c
+SRC = transformeeHough.c transformeeHough2.c transformeeHough3.c filtreCanny.c HoughTransform.c dec.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
@@ -17,6 +17,7 @@ transformeeHough2 : transformeeHough2.o
 transformeeHough3 : transformeeHough3.o
 filtreCanny : filtreCanny.o
 HoughTransform : HoughTransform.o
+dec : dec.o
 
 .PHONY: clean
 
