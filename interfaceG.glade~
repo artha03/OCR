@@ -158,7 +158,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="open_image">
+                      <object class="GtkImageMenuItem">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
