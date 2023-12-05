@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,7 +7,7 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-
+#define MAX_LINES 100
 typedef struct
 {
     double rho;
@@ -75,15 +76,22 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
         }
     }
 }
+///////////////////////////
+
+
+
+
+
+
+
+
+//////////////////////////
 
 
 void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
 {
-    //int maxDist = (int)sqrt(cannyImage->w * cannyImage->w + cannyImage->h * cannyImage->h);
     int maxDist = cannyImage->w + cannyImage->h;
     int thetaRes = 180;
-    //int accumulator[maxDist][thetaRes];
-
 
     int** accumulator = malloc(maxDist * sizeof(int*));
     for (int i = 0; i < maxDist; ++i)
@@ -97,6 +105,9 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
             accumulator[i][j] = 0;
         }
     }
+
+    double thresholdPercentage = 0.35;
+    int maxAccumulatorValue = 0;
 
     for (int y = 0; y < cannyImage->h; ++y)
     {
@@ -113,11 +124,15 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                     rho = (rho + maxDist) % maxDist;
                     theta = theta % thetaRes;
 
-                    //accumulator[rho][theta]++;
                     if (rho >= 0 && rho < maxDist && theta >= 0 && theta < thetaRes)
                     {
                         accumulator[rho][theta]++;
-                    } else
+                        if (accumulator[rho][theta] > maxAccumulatorValue)
+                        {
+                            maxAccumulatorValue = accumulator[rho][theta];
+                        }
+                    }
+                    else
                     {
                         fprintf(stderr, "Indices rho=%d, theta=%d hors limites.\n", rho, theta);
                     }
@@ -126,56 +141,85 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
         }
     }
 
-    int maxAccumulatorValue = 0;
-    for (int rho = 0; rho < maxDist; ++rho)
-    {
-        for (int theta = 0; theta < thetaRes; ++theta)
-        {
-            if (accumulator[rho][theta] > maxAccumulatorValue)
-            {
-                maxAccumulatorValue = accumulator[rho][theta];
-            }
-        }
-    }
+    double rhoThreshold = 20.0;
+    double thetaThreshold = 5.0;
 
-    double thresholdPercentage = 0.35;  // Ajustez ce pourcentage selon vos besoins
-
+    Line lines[MAX_LINES];
+    int linesCount = 0;
 
     for (int rho = 0; rho < maxDist; ++rho)
     {
         for (int theta = 0; theta < thetaRes; ++theta)
         {
-            if (accumulator[rho][theta] > maxAccumulatorValue * thresholdPercentage)
+            if (rho >= 0 && rho < maxDist && theta >= 0 && theta < thetaRes)
             {
-                double radians = theta * M_PI / 180.0;
-
-                // Filtrer les lignes verticales ou horizontales
-                if (fabs(cos(radians)) < 0.1 || fabs(sin(radians)) < 0.1)
+                if (accumulator[rho][theta] > maxAccumulatorValue * thresholdPercentage)
                 {
-                    double a = cos(radians);
-                    double b = sin(radians);
-                    double x0 = a * (rho - maxDist / 2);
-                    double y0 = b * (rho - maxDist / 2);
-                    double scale = 2000.0;
+                    double radians = theta * M_PI / 180.0;
 
+                    // Filtrer les lignes verticales ou horizontales
+                    if (fabs(cos(radians)) < 0.1 || fabs(sin(radians)) < 0.1)
+                    {
+                        double a = cos(radians);
+                        double b = sin(radians);
+                        double x0 = a * (rho - maxDist / 2);
+                        double y0 = b * (rho - maxDist / 2);
+                        double scale = 2000.0;
 
-                    SDL_DrawLine(cannyImage, (int)(x0 - scale * b), (int)(y0 + scale * a),(int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
-                    // Ajouter une impression pour le débogage
-                    //printf("Ligne détectée - rho: %d, theta: %d\n", rho, theta);
+                        // Vérifier si la ligne est proche d'une ligne déjà détectée
+                        int existingLineIndex = -1;
+
+                        for (int i = 0; i < linesCount; ++i)
+                        {
+                            Line currentLine = lines[i];
+                            if (fabs(currentLine.rho - rho) < rhoThreshold &&
+                                fabs(currentLine.theta - theta) < thetaThreshold)
+                            {
+                                existingLineIndex = i;
+                                break;
+                            }
+                        }
+
+                        if (existingLineIndex != -1)
+                        {
+                            // Mettre à jour la ligne existante avec la moyenne
+                            Line existingLine = lines[existingLineIndex];
+                            existingLine.rho = (existingLine.rho + rho) / 2.0;
+                            existingLine.theta = (existingLine.theta + theta) / 2.0;
+                        }
+                        else
+                        {
+                            // Ajouter une nouvelle ligne
+                            lines[linesCount].rho = rho;
+                            lines[linesCount].theta = theta;
+                            linesCount++;
+                        }
+                    }
                 }
             }
         }
     }
 
+    for (int i = 0; i < linesCount; ++i)
+    {
+        Line currentLine = lines[i];
+        double radians = currentLine.theta * M_PI / 180.0;
+        double a = cos(radians);
+        double b = sin(radians);
+        double x0 = a * (currentLine.rho - maxDist / 2);
+        double y0 = b * (currentLine.rho - maxDist / 2);
+        double scale = 2000.0;
+
+        SDL_DrawLine(cannyImage, (int)(x0 - scale * b), (int)(y0 + scale * a),
+                     (int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
+    }
 
     for (int i = 0; i < maxDist; ++i)
     {
         free(accumulator[i]);
     }
     free(accumulator);
-
 }
-
 
 
 int main(int argc, char ** argv) {

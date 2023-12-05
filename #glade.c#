@@ -1,0 +1,20 @@
+#include <gtk/gtk.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+GtkBuilder *builder;
+gchar *filename;
+GtkWidget *window = NULL;
+GtkStack *stack;
+GtkStack *stack_2;
+
+char *get_filename_ext(const char *filename)
+{
+    // get the filename extension
+    char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename)
+        return "";
+    return dot + 1;
+}

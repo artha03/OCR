@@ -1,0 +1,78 @@
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include <stdio.h>
+#include <stdlib.h>
+// Fonction pour obtenir la couleur d'un pixel
+Uint32 get_pixel(SDL_Surface *surface, int x, int y) {
+    int bpp = surface->format->BytesPerPixel;
+    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+    switch (bpp) {
+    case 1:
+        return *p;
+    case 2:
+        return *(Uint16 *)p;
+    case 3:
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            return p[0] << 16 | p[1] << 8 | p[2];
+        else
+            return p[0] | p[1] << 8 | p[2] << 16;
+    case 4:
+        return *(Uint32 *)p;
+    default:
+        return 0; // Ne devrait jamais arriver, mais évite les avertissements du compilateur
+    }
+}
+
+// Fonction pour charger l'image avec SDL2
+SDL_Surface *load_image(const char *path) {
+    SDL_Surface *image = IMG_Load(path);
+    if (!image) {
+        printf("Erreur lors du chargement de l'image : %s\n", IMG_GetError());
+        exit(1);
+    }
+    return image;
+}
+
+int main() {
+    SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG);
+
+    // Charger l'image avec les lignes de la grille tracées
+    SDL_Surface *image = load_image("hough2.jpeg");
+
+    // Parcourir les pixels pour trouver les lignes rouges
+    int min_x = image->w, min_y = image->h, max_x = 0, max_y = 0;
+    for (int y = 0; y < image->h; ++y) {
+        for (int x = 0; x < image->w; ++x) {
+            Uint32 pixel = get_pixel(image, x, y);
+            Uint8 r, g, b, a;
+            SDL_GetRGBA(pixel, image->format, &r, &g, &b, &a);
+
+            // Vérifier si le pixel est rouge
+            if (r > 200 && g < 100 && b < 100) {
+                // Marquer ou stocker ces coordonnées
+                if (x < min_x) min_x = x;
+                if (x > max_x) max_x = x;
+                if (y < min_y) min_y = y;
+                if (y > max_y) max_y = y;
+            }
+        }
+    }
+
+    // Extraire la partie de l'image avec la grille
+    SDL_Rect gridRect = {min_x, min_y, max_x - min_x, max_y - min_y};
+    SDL_Surface *gridSurface = SDL_CreateRGBSurface(0, gridRect.w, gridRect.h, 32, 0, 0, 0, 0);
+    SDL_BlitSurface(image, &gridRect, gridSurface, NULL);
+
+    // Enregistrer l'image de la grille si nécessaire
+    IMG_SavePNG(gridSurface, "res.jpeg");
+
+    // Libérer les surfaces
+    SDL_FreeSurface(image);
+    SDL_FreeSurface(gridSurface);
+
+    IMG_Quit();
+    SDL_Quit();
+    return 0;
+}
