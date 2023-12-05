@@ -289,44 +289,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkOverlay">
-            <property name="width-request">387</property>
-            <property name="height-request">277</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can-focus">False</property>
-                <property name="has-focus">True</property>
-                <property name="is-focus">True</property>
-                <property name="has-default">True</property>
-                <property name="events">GDK_ENTER_NOTIFY_MASK | GDK_STRUCTURE_MASK</property>
-                <property name="no-show-all">True</property>
-                <property name="halign">end</property>
-                <property name="valign">end</property>
-                <property name="margin-left">77</property>
-                <property name="margin-end">19</property>
-                <property name="margin-top">65</property>
-                <property name="stock">gtk-missing-image</property>
-                <child internal-child="accessible">
-                  <object class="AtkObject">
-                    <property name="AtkObject::accessible-role">alert</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="index">6</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="x">14</property>
-            <property name="y">37</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkLabel">
             <property name="width-request">100</property>
             <property name="height-request">80</property>
@@ -342,28 +304,28 @@
         <child>
           <object class="GtkButton">
             <property name="label" translatable="yes">&gt;&gt;</property>
-            <property name="width-request">50</property>
+            <property name="width-request">56</property>
             <property name="height-request">34</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
           </object>
           <packing>
-            <property name="x">664</property>
-            <property name="y">253</property>
+            <property name="x">674</property>
+            <property name="y">252</property>
           </packing>
         </child>
         <child>
           <object class="GtkButton">
             <property name="label" translatable="yes">&lt;&lt;</property>
-            <property name="width-request">50</property>
+            <property name="width-request">56</property>
             <property name="height-request">34</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
           </object>
           <packing>
-            <property name="x">567</property>
+            <property name="x">553</property>
             <property name="y">252</property>
           </packing>
         </child>
