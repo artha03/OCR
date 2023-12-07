@@ -33,7 +33,7 @@ void open_image(GtkWidget *widget, gpointer data) {
 
         // Affiche l'image dans une fenêtre ou une boîte de dialogue, selon tes besoins
         // Par exemple, si tu as une fenêtre principale appelée "main_window":
-        // gtk_container_add(GTK_CONTAINER(main_window), GTK_WIDGET(image));
+	gtk_container_add(GTK_CONTAINER(widget), GTK_WIDGET(image));
 
         // N'oublie pas de libérer la mémoire allouée pour le nom du fichier
         g_free(filename);
@@ -59,8 +59,7 @@ int main(int argc, char *argv[]) {
 
     GtkWindow* window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
     GtkWidget *open_item = GTK_WIDGET(gtk_builder_get_object(builder, "open_image"));
-
-
+ GtkWidget *sudoku = GTK_WIDGET(gtk_builder_get_object(builder, "sudoku"));
     g_signal_connect(G_OBJECT(open_item), "activate", G_CALLBACK(open_image), window);
 
      // Lance la boucle principale GTK

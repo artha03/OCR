@@ -329,6 +329,19 @@
             <property name="y">252</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkImage" id="sudoku">
+            <property name="width-request">490</property>
+            <property name="height-request">312</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-top">36</property>
+          </object>
+          <packing>
+            <property name="x">18</property>
+            <property name="y">43</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>
