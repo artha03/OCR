@@ -7,16 +7,18 @@
 #define WIDTH 800
 #define HEIGHT 600
 #define MAX_LINES 10000
+
+
 typedef struct
 {
     double rho;
     double theta;
 } Line;
 
-Uint8* pixelref(SDL_Surface *surface, int posx, int posy)
+Uint8 *pixelref(SDL_Surface *surface, int posx, int posy)
 {
     int bpp = surface->format->BytesPerPixel;
-    return (Uint8*)surface->pixels + posy * surface->pitch + posx * bpp;
+    return (Uint8 *)surface->pixels + posy * surface->pitch + posx * bpp;
 }
 
 Uint32 SDL_GetPixel(SDL_Surface *surface, int posx, int posy)
@@ -24,19 +26,19 @@ Uint32 SDL_GetPixel(SDL_Surface *surface, int posx, int posy)
     Uint8 *pixel = pixelref(surface, posx, posy);
     switch (surface->format->BytesPerPixel)
     {
-        case 1:
-            return *pixel;
-        case 2:
-            return *(Uint16*)pixel;
-        case 3:
-            if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                return pixel[0] << 16 | pixel[1] << 8 | pixel[2];
-            else
-                return pixel[0] | pixel[1] << 8 | pixel[2] << 16;
-        case 4:
-            return *(Uint32*)pixel;
-        default:
-            return 0;
+    case 1:
+        return *pixel;
+    case 2:
+        return *(Uint16 *)pixel;
+    case 3:
+        if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            return pixel[0] << 16 | pixel[1] << 8 | pixel[2];
+        else
+            return pixel[0] | pixel[1] << 8 | pixel[2] << 16;
+    case 4:
+        return *(Uint32 *)pixel;
+    default:
+        return 0;
     }
 }
 
@@ -53,7 +55,7 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
         if (x1 >= 0 && x1 < surface->w && y1 >= 0 && y1 < surface->h)
         {
             Uint8 *pixel = pixelref(surface, x1, y1);
-            *(Uint32*)pixel = color;
+            *(Uint32 *)pixel = color;
         }
 
         if (x1 == x2 && y1 == y2)
@@ -75,24 +77,95 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
         }
     }
 }
-///////////////////////////
 
+// Structure représentant un point dans l'espace 2D
+// Structure représentant un point dans l'espace 2D
+typedef struct
+{
+    double x;
+    double y;
+} Point;
 
+// Fonction pour trouver l'intersection de deux lignes
+Point findIntersection(Line line1, Line line2, int maxDist)
+{
+    double a1 = cos(line1.theta * M_PI / 180.0);
+    double b1 = sin(line1.theta * M_PI / 180.0);
+    double x01 = a1 * (line1.rho - maxDist / 2);
+    double y01 = b1 * (line1.rho - maxDist / 2);
 
+    double a2 = cos(line2.theta * M_PI / 180.0);
+    double b2 = sin(line2.theta * M_PI / 180.0);
+    double x02 = a2 * (line2.rho - maxDist / 2);
+    double y02 = b2 * (line2.rho - maxDist / 2);
 
+    double det = a1 * b2 - a2 * b1;
 
+    if (fabs(det) < 1e-5)
+    {
+        // Les lignes sont parallèles, retourne un point indéfini
+        return (Point){INFINITY, INFINITY};
+    }
+    else
+    {
+        double x = (b2 * x01 - b1 * x02) / det;
+        double y = (a1 * y02 - a2 * y01) / det;
+        return (Point){x, y};
+    }
+}
 
+// Fonction pour trouver les coins de la grille à partir des lignes détectées
+void findGridCorners(Line lines[], int linesCount, int maxDist)
+{
+    for (int i = 0; i < linesCount - 1; ++i)
+    {
+        for (int j = i + 1; j < linesCount; ++j)
+        {
+            Point intersection = findIntersection(lines[i], lines[j], maxDist);
+            // Si l'intersection est à l'intérieur de l'image, affichez les coordonnées
+            if (intersection.x >= 0 && intersection.x < WIDTH && intersection.y >= 0 && intersection.y < HEIGHT)
+            {
+                printf("Corner at (%f, %f)\n", intersection.x, intersection.y);
+                // Vous pouvez stocker ces points dans un tableau ou les utiliser directement selon vos besoins.
+            }
+        }
+    }
+}
 
+// Fonction pour calculer la distance euclidienne entre deux points
+double distanceBetweenPoints(Point p1, Point p2)
+{
+    return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
+}
 
-//////////////////////////
+// Fonction pour calculer la distance spatiale entre deux lignes dans l'espace image
+double distanceBetweenLines(Line line1, int rho2, int theta2, int maxDist)
+{
+    // Convertir les coordonnées polaires en coordonnées cartésiennes pour les deux lignes
+    double a1 = cos(line1.theta * M_PI / 180.0);
+    double b1 = sin(line1.theta * M_PI / 180.0);
+    double x01 = a1 * (line1.rho - maxDist / 2);
+    double y01 = b1 * (line1.rho - maxDist / 2);
 
+    double a2 = cos(theta2 * M_PI / 180.0);
+    double b2 = sin(theta2 * M_PI / 180.0);
+    double x02 = a2 * (rho2 - maxDist / 2);
+    double y02 = b2 * (rho2 - maxDist / 2);
+
+    // Trouver les points les plus proches des deux lignes
+    double t1 = a1 * x02 - b1 * y02 - x01;
+    double t2 = b1 * x02 + a1 * y02 - y01;
+
+    // Calculer et retourner la distance euclidienne entre les points les plus proches
+    return sqrt(t1 * t1 + t2 * t2);
+}
 
 void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
 {
     int maxDist = cannyImage->w + cannyImage->h;
     int thetaRes = 180;
 
-    int** accumulator = malloc(maxDist * sizeof(int*));
+    int **accumulator = malloc(maxDist * sizeof(int *));
     for (int i = 0; i < maxDist; ++i)
     {
         accumulator[i] = malloc(thetaRes * sizeof(int));
@@ -156,7 +229,6 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                 {
                     double radians = theta * M_PI / 180.0;
 
-                    // Filtrer les lignes verticales ou horizontales
                     if (fabs(cos(radians)) < 0.1 || fabs(sin(radians)) < 0.1)
                     {
                         double a = cos(radians);
@@ -165,7 +237,6 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                         double y0 = b * (rho - maxDist / 2);
                         double scale = 2000.0;
 
-                        // Vérifier si la ligne est proche d'une ligne déjà détectée
                         int existingLineIndex = -1;
 
                         for (int i = 0; i < linesCount; ++i)
@@ -179,16 +250,9 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                             }
                         }
 
-                        if (existingLineIndex != -1)
+                        if (existingLineIndex == -1)
                         {
-                            // Mettre à jour la ligne existante avec la moyenne
-                            Line existingLine = lines[existingLineIndex];
-                            existingLine.rho = (existingLine.rho + rho) / 2.0;
-                            existingLine.theta = (existingLine.theta + theta) / 2.0;
-                        }
-                        else
-                        {
-                            // Ajouter une nouvelle ligne
+                            // Ajouter une nouvelle ligne seulement si elle n'est pas proche des autres lignes
                             lines[linesCount].rho = rho;
                             lines[linesCount].theta = theta;
                             linesCount++;
@@ -212,13 +276,15 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
         SDL_DrawLine(cannyImage, (int)(x0 - scale * b), (int)(y0 + scale * a),
                      (int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
     }
-
+    
+    findGridCorners(lines, linesCount, maxDist);
     for (int i = 0; i < maxDist; ++i)
     {
         free(accumulator[i]);
     }
     free(accumulator);
 }
+
 
 
 int main(int argc, char ** argv) {
