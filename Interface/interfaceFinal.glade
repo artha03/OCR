@@ -33,7 +33,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="open_image">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -166,17 +166,19 @@
           </packing>
         </child>
         <child>
-          <object class="GtkPaned">
+          <object class="GtkPaned" id="panel">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
-              <object class="GtkImage">
+              <object class="GtkImage" id="sudoku">
+                <property name="width-request">100</property>
+                <property name="height-request">100</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="stock">gtk-missing-image</property>
               </object>
               <packing>
-                <property name="resize">False</property>
+                <property name="resize">True</property>
                 <property name="shrink">True</property>
               </packing>
             </child>

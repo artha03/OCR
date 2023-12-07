@@ -49,9 +49,9 @@ void open_image(GtkWidget *widget, gpointer data)
                                                    gdk_pixbuf_get_height (pixbuf) / 2,
                                                    GDK_INTERP_NEAREST);
 
-            image_display = gtk_image_new_from_pixbuf (pixbuf_mini);
+            gtk_image_set_from_pixbuf(GTK_IMAGE(image_display), pixbuf_mini);
             //find_fixed(GTK_WIDGET(main_window),NULL);
-            gtk_container_add (GTK_CONTAINER(panel_image), image_display);
+            //gtk_container_add (GTK_CONTAINER(panel_image), image_display);
 
         }
         else
@@ -166,26 +166,52 @@ int main(int argc, char *argv[])
     main_window = GTK_WINDOW(gtk_builder_get_object(builder, "window"));
     if (main_window == NULL)
     {
-        printf("window == NULL");
+        g_print("window == NULL\n");
     }
     GtkWidget *open_item = GTK_WIDGET(gtk_builder_get_object(builder, "open_image"));
     if (open_item == NULL)
     {
-        printf("open_item == NULL");
+        g_print("open_item == NULL\n");
     }
+
     image_display = GTK_WIDGET(gtk_builder_get_object(builder, "sudoku"));
     if (image_display == NULL)
     {
-        printf("image_display == NULL");
+        g_print("image_display == NULL\n");
     }
     panel_image = GTK_WIDGET(gtk_builder_get_object(builder, "panel"));
     if (panel_image== NULL)
     {
-        printf("panel_image == NULL");
+        g_print("panel_image == NULL\n");
     }
 
 
+    GdkPixbuf *pixbuf = NULL;
+
+    pixbuf = gdk_pixbuf_new_from_file ("imageBlanche.jpg", &error);
+    if (!error)
+    {
+        GdkPixbuf *pixbuf_mini = NULL;
+
+        pixbuf_mini = gdk_pixbuf_scale_simple (pixbuf,
+                                               gdk_pixbuf_get_width (pixbuf) / 2,
+                                               gdk_pixbuf_get_height (pixbuf) / 2,
+                                               GDK_INTERP_NEAREST);
+
+        gtk_image_set_from_pixbuf(GTK_IMAGE(image_display), pixbuf_mini);//image_display = gtk_image_new_from_pixbuf (pixbuf_mini);
+        //find_fixed(GTK_WIDGET(main_window),NULL);
+    }
+    else
+    {
+        g_critical ("%s",error->message);
+    }
+    //////////////////////////////////////////////////////////
+    //gtk_image_set_from_file(GTK_IMAGE(image_display), filename);
+
+
     g_signal_connect(G_OBJECT(open_item), "activate", G_CALLBACK(open_image), main_window);
+
+
 
      // Lance la boucle principale GTK
     gtk_widget_show_all(GTK_WIDGET(main_window));
