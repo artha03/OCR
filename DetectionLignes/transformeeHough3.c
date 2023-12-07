@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -7,7 +6,7 @@
 
 #define WIDTH 800
 #define HEIGHT 600
-#define MAX_LINES 100
+#define MAX_LINES 10000
 typedef struct
 {
     double rho;
