@@ -78,87 +78,6 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
     }
 }
 
-// Structure représentant un point dans l'espace 2D
-// Structure représentant un point dans l'espace 2D
-typedef struct
-{
-    double x;
-    double y;
-} Point;
-
-// Fonction pour trouver l'intersection de deux lignes
-Point findIntersection(Line line1, Line line2, int maxDist)
-{
-    double a1 = cos(line1.theta * M_PI / 180.0);
-    double b1 = sin(line1.theta * M_PI / 180.0);
-    double x01 = a1 * (line1.rho - maxDist / 2);
-    double y01 = b1 * (line1.rho - maxDist / 2);
-
-    double a2 = cos(line2.theta * M_PI / 180.0);
-    double b2 = sin(line2.theta * M_PI / 180.0);
-    double x02 = a2 * (line2.rho - maxDist / 2);
-    double y02 = b2 * (line2.rho - maxDist / 2);
-
-    double det = a1 * b2 - a2 * b1;
-
-    if (fabs(det) < 1e-5)
-    {
-        // Les lignes sont parallèles, retourne un point indéfini
-        return (Point){INFINITY, INFINITY};
-    }
-    else
-    {
-        double x = (b2 * x01 - b1 * x02) / det;
-        double y = (a1 * y02 - a2 * y01) / det;
-        return (Point){x, y};
-    }
-}
-
-// Fonction pour trouver les coins de la grille à partir des lignes détectées
-void findGridCorners(Line lines[], int linesCount, int maxDist)
-{
-    for (int i = 0; i < linesCount - 1; ++i)
-    {
-        for (int j = i + 1; j < linesCount; ++j)
-        {
-            Point intersection = findIntersection(lines[i], lines[j], maxDist);
-            // Si l'intersection est à l'intérieur de l'image, affichez les coordonnées
-            if (intersection.x >= 0 && intersection.x < WIDTH && intersection.y >= 0 && intersection.y < HEIGHT)
-            {
-                printf("Corner at (%f, %f)\n", intersection.x, intersection.y);
-                // Vous pouvez stocker ces points dans un tableau ou les utiliser directement selon vos besoins.
-            }
-        }
-    }
-}
-
-// Fonction pour calculer la distance euclidienne entre deux points
-double distanceBetweenPoints(Point p1, Point p2)
-{
-    return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
-}
-
-// Fonction pour calculer la distance spatiale entre deux lignes dans l'espace image
-double distanceBetweenLines(Line line1, int rho2, int theta2, int maxDist)
-{
-    // Convertir les coordonnées polaires en coordonnées cartésiennes pour les deux lignes
-    double a1 = cos(line1.theta * M_PI / 180.0);
-    double b1 = sin(line1.theta * M_PI / 180.0);
-    double x01 = a1 * (line1.rho - maxDist / 2);
-    double y01 = b1 * (line1.rho - maxDist / 2);
-
-    double a2 = cos(theta2 * M_PI / 180.0);
-    double b2 = sin(theta2 * M_PI / 180.0);
-    double x02 = a2 * (rho2 - maxDist / 2);
-    double y02 = b2 * (rho2 - maxDist / 2);
-
-    // Trouver les points les plus proches des deux lignes
-    double t1 = a1 * x02 - b1 * y02 - x01;
-    double t2 = b1 * x02 + a1 * y02 - y01;
-
-    // Calculer et retourner la distance euclidienne entre les points les plus proches
-    return sqrt(t1 * t1 + t2 * t2);
-}
 
 void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
 {
@@ -277,7 +196,6 @@ void houghTransform(SDL_Surface *cannyImage, SDL_Renderer *renderer)
                      (int)(x0 + scale * b), (int)(y0 - scale * a), 0xFF0000);
     }
     
-    findGridCorners(lines, linesCount, maxDist);
     for (int i = 0; i < maxDist; ++i)
     {
         free(accumulator[i]);
