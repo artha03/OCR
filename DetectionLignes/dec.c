@@ -50,7 +50,7 @@ void new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y)
 {
     int x = 0;
     char s[50];
-    char * baseName = "Image_";
+    char * baseName = "Decoupage/Image_";
     for (int i = 0; i < GRID_SIZE; ++i) {
         for (int j = 0; j < GRID_SIZE; ++j) {
             SDL_Rect cellRect = {j * CELL_SIZE_X, i * CELL_SIZE_Y, CELL_SIZE_X, CELL_SIZE_Y};

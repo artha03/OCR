@@ -94,8 +94,8 @@ void compareNeighbors(SDL_Surface *gradient, SDL_Surface *image, int x, int y, i
     Uint8 *neighbor2 = (Uint8 *)gradient->pixels + (y - dy) * gradient->pitch + (x - dx) * 4;
 
     Uint8 *centerPixel = (Uint8 *)image->pixels + y * image->pitch + x * 4;
-    Uint8 *neighbor1Pixel = (Uint8 *)image->pixels + (y + dy) * image->pitch + (x + dx) * 4;
-    Uint8 *neighbor2Pixel = (Uint8 *)image->pixels + (y - dy) * image->pitch + (x - dx) * 4;
+    //Uint8 *neighbor1Pixel = (Uint8 *)image->pixels + (y + dy) * image->pitch + (x + dx) * 4;
+    //Uint8 *neighbor2Pixel = (Uint8 *)image->pixels + (y - dy) * image->pitch + (x - dx) * 4;
 
     if (center[0] < neighbor1[0] || center[0] < neighbor2[0]) {
         centerPixel[0] = centerPixel[1] = centerPixel[2] = 0;

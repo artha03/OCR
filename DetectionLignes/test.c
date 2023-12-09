@@ -9,6 +9,7 @@
 #include "filtreCanny.h"
 #include "transformeeHough3.h"
 #include "rogne.h"
+#include "resize.h"
 
 int main(int argc, char ** argv) {
 
@@ -38,7 +39,7 @@ int main(int argc, char ** argv) {
         return EXIT_FAILURE;
     }*/
 
-    SDL_Surface *image = IMG_Load(argv[1]);
+    SDL_Surface *image = load_image(argv[1]);
     if (!image) {
         fprintf(stderr, "Erreur lors du chargement de l'image: %s\n", IMG_GetError());
         //SDL_DestroyRenderer(renderer);
@@ -57,6 +58,11 @@ int main(int argc, char ** argv) {
     int CELL_SIZE_Y = image->h /9;
 
     new_img(image,CELL_SIZE_X,CELL_SIZE_Y);
+
+    int err = res();
+    if(err!= 0) {
+        fprintf(stderr, "Erreur lors de la sauvegarde de l'image: %s\n", SDL_GetError());
+    }
 
 
     if(SDL_SaveBMP(image, argv[2]) != 0) {
