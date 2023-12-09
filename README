@@ -1,1 +1,47 @@
-# OCR
+EN:
+
+Hello,
+
+Here is a guide to assist you in using our sudoku solver.
+
+    Upon downloading our project folder, navigate to it using a terminal;
+    Use the 'make' command to compile the project;
+    Upon compilation, an executable will be generated. You can execute it by typing "./main";
+    The execution will open a window for interaction, presenting various buttons:
+        Located at the top left is the "Quit" button, allowing you to close the program;
+        On the same side, you will find another button:
+        "Load Image"
+            Clicking this button will prompt a file explorer where you can select the sudoku image you wish to solve;
+            Once the image is selected, click "OK"
+        You'll return to the main window where you can verify that your image is displayed correctly;
+        Optionally, apply a rotation to the image using the input area below the image to straighten it;
+        Next, use the "RUN" button to process your image, making it legible. The resulting processed image will be displayed;
+        A new button becomes available: the "Solve" button. Clicking it will display the solved sudoku image, with pre-existing numbers in black and identified numbers in red;
+        At any time, you can load a new image to solve another sudoku puzzle.
+
+Should you wish to uninstall the executable, use the "make clean" command in the project folder via a terminal.
+
+FR:
+
+Bien sûr, voici le texte reformulé :
+
+Bonjour,
+
+Voici un guide pour vous aider à utiliser notre solveur de sudoku.
+
+    Après avoir téléchargé le dossier de notre projet, rendez-vous dans ce dossier via un terminal ;
+    Utilisez la commande 'make' pour compiler le projet ;
+    Suite à la compilation, un exécutable sera généré. Vous pouvez lancer l'exécution en tapant "./main" ;
+    L'exécution ouvrira une fenêtre avec laquelle vous pourrez interagir, proposant différents boutons :
+        En haut à gauche se trouve le bouton "Quit", vous permettant de fermer le programme ;
+        Sur le même côté, vous trouverez un autre bouton :
+        "Charger une Image"
+            En cliquant sur ce bouton, un explorateur de fichiers s'affichera vous permettant de sélectionner l'image du sudoku que vous souhaitez résoudre ;
+            Une fois l'image sélectionnée, cliquez sur "OK"
+        Vous reviendrez à la fenêtre principale où vous pourrez vérifier que votre image est correctement affichée ;
+        Si vous le désirez, appliquez une rotation à l'image en utilisant la zone de saisie située sous l'image pour la redresser ;
+        Ensuite, utilisez le bouton "Exécuter" pour traiter votre image et la rendre lisible. L'image résultante du traitement sera affichée ;
+        Un nouveau bouton sera disponible : le bouton "Résoudre". En le cliquant, l'image du sudoku résolu s'affichera, avec les nombres préexistants en noir et les nombres identifiés en rouge ;
+        À tout moment, vous pouvez charger une nouvelle image pour résoudre un autre sudoku.
+
+Si vous souhaitez désinstaller l'exécutable, utilisez la commande "make clean" dans le dossier du projet via un terminal.

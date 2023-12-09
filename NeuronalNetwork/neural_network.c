@@ -1,8 +1,7 @@
-#include <SDL2/SDL.h>
-#include <err.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 typedef struct Neuron
 {
@@ -29,7 +28,7 @@ typedef struct Network
     Layer *layers;
 } Network;
 
-//////////////////////////////// NEURON////////////////////////////////////////
+//////////////////////////////// NEURON ////////////////////////////////////////
 Neuron NewNeuron(unsigned int nbWeights)
 {
     Neuron neuron;
@@ -57,7 +56,7 @@ void FreeNeuron(Neuron *neuron)
     free(neuron->weights);
 }
 
-//////////////////////////////// LAYER////////////////////////////////////////
+//////////////////////////////// LAYER ////////////////////////////////////////
 Layer NewLayer(unsigned int nbNeurons, unsigned int nbWeights)
 {
     Layer layer;
@@ -88,7 +87,7 @@ void FreeLayer(Layer *layer)
     free(layer->neurons);
 }
 
-//////////////////////////////// NETWORK////////////////////////////////////////
+//////////////////////////////// NETWORK ////////////////////////////////////////
 
 Network NewNetwork(unsigned int sizeInput, unsigned int sizeHidden, unsigned int sizeOutput,
                    unsigned int nbHiddenLayers)
@@ -134,67 +133,84 @@ void FreeNetwork(Network *network)
     free(network->layers);
 }
 
+//////////////////////////////// FUNCTIONS ////////////////////////////////////////
+
+
 void FrontPropagation(Network *network, double *inputs)
 {
-    for(unsigned int i = 0; i < network->sizeInput; i++)
+    if (inputs == NULL)
+        return;
+
+    for (unsigned int i = 0; i < network->sizeInput; i++)
     {
         network->layers[0].neurons[i].value = inputs[i];
     }
 
-    for(unsigned int i = 1; i < network->nbLayers; i++)
+    for (unsigned int i = 1; i < network->nbLayers; i++)
     {
-        for(unsigned int j = 0; j < network->layers[i].nbNeurons; j++)
+        Layer *currentLayer = &network->layers[i];
+        Layer *prevLayer = &network->layers[i - 1];
+
+        for (unsigned int j = 0; j < currentLayer->nbNeurons; j++)
         {
             double sum = 0;
-            for(unsigned int k = 0; k < network->layers[i-1].nbNeurons; k++)
+
+            for (unsigned int k = 0; k < prevLayer->nbNeurons; k++)
             {
-                sum += network->layers[i-1].neurons[k].value * network->layers[i].neurons[j].weights[k];
+                sum += prevLayer->neurons[k].value * currentLayer->neurons[j].weights[k];
             }
-            sum += network->layers[i].neurons[j].bias;
-            network->layers[i].neurons[j].value = 1 / (1 + exp(-sum));
+
+            sum += currentLayer->neurons[j].bias;
+            currentLayer->neurons[j].value = 1 / (1 + exp(-sum)); // Utilisation de la fonction sigmoïde
         }
     }
 }
-
 
 
 void BackPropagation(Network *network, double *expected)
 {
-    for(unsigned int i = 0; i < network->sizeOutput; i++)
+    // Calcul des deltas pour la couche de sortie
+    for (unsigned int i = 0; i < network->sizeOutput; i++)
     {
-        network->layers[2].neurons[i].delta = network->layers[2].neurons[i].value * (1 - network->layers[2].neurons[i].value) * (expected[i] - network->layers[2].neurons[i].value);
+        double output = network->layers[network->nbLayers - 1].neurons[i].value;
+        network->layers[network->nbLayers - 1].neurons[i].delta = output * (1 - output) * (expected[i] - output);
     }
 
-    for(unsigned int i = 1; i < network->nbLayers - 1; i++)
+    // Calcul des deltas pour les couches cachées
+    for (int i = network->nbLayers - 2; i > 0; i--)
     {
-        for(unsigned int j = 0; j < network->layers[i].nbNeurons; j++)
+        for (unsigned int j = 0; j < network->layers[i].nbNeurons; j++)
         {
             double sum = 0;
-            for(unsigned int k = 0; k < network->layers[i+1].nbNeurons; k++)
+            for (unsigned int k = 0; k < network->layers[i + 1].nbNeurons; k++)
             {
-                sum += network->layers[i+1].neurons[k].delta * network->layers[i+1].neurons[k].weights[j];
+                sum += network->layers[i + 1].neurons[k].delta * network->layers[i + 1].neurons[k].weights[j];
             }
-            network->layers[i].neurons[j].delta = network->layers[i].neurons[j].value * (1 - network->layers[i].neurons[j].value) * sum;
+            double value = network->layers[i].neurons[j].value;
+            network->layers[i].neurons[j].delta = value * (1 - value) * sum;
         }
     }
 }
 
-void GradientDescent(Network *network, double learningRate)
-{
-    for(unsigned int i = 1; i < network->nbLayers; i++)
-    {
-        for(unsigned int j = 0; j < network->layers[i].nbNeurons; j++)
-        {
-            for(unsigned int k = 0; k < network->layers[i-1].nbNeurons; k++)
-            {
-                network->layers[i].neurons[j].weights[k] += learningRate * network->layers[i].neurons[j].delta * network->layers[i-1].neurons[k].value;
+
+void GradientDescent(Network *network, double learningRate) {
+    for (unsigned int i = 1; i < network->nbLayers; i++) {
+        Layer *currentLayer = &network->layers[i];
+        Layer *prevLayer = &network->layers[i - 1];
+
+        for (unsigned int j = 0; j < currentLayer->nbNeurons; j++) {
+            Neuron *currentNeuron = &currentLayer->neurons[j];
+
+            for (unsigned int k = 0; k < prevLayer->nbNeurons; k++) {
+                currentNeuron->weights[k] += learningRate * currentNeuron->delta * prevLayer->neurons[k].value;
             }
-            network->layers[i].neurons[j].bias += learningRate * network->layers[i].neurons[j].delta;
+            currentNeuron->bias += learningRate * currentNeuron->delta;
         }
     }
 }
 
-//affiche le réseau de neurone
+//////////////////////////////// PRINT ////////////////////////////////////////
+
 void PrintNetwork(Network *network)
 {
     printf("Network :\n");
@@ -205,70 +221,16 @@ void PrintNetwork(Network *network)
         {
             printf("Neuron %d :\n", j);
             printf("Value : %f\n", network->layers[i].neurons[j].value);
-            //printf("Bias : %f\n", network->layers[i].neurons[j].bias);
-            //printf("Delta : %f\n", network->layers[i].neurons[j].delta);
-            /*printf("Weights : ");
+            printf("Bias : %f\n", network->layers[i].neurons[j].bias);
+            printf("Delta : %f\n", network->layers[i].neurons[j].delta);
+            printf("Weights : ");
             for(unsigned int k = 0; k < network->layers[i].neurons[j].nbWeights; k++)
             {
                 printf("%f ", network->layers[i].neurons[j].weights[k]);
-            }*/
+            }
             printf("\n");
         }
     }
 }
 
-//////////////////////////////// MAIN////////////////////////////////////////
 
-//main qui test le réseau de neurone pour le XOR
-int main() {
-
-    Network network = NewNetwork(2, 10, 1, 1);
-    InitNetwork(&network);
-
-    double inputs[4][2] = {{0, 0},
-                           {0, 1},
-                           {1, 0},
-                           {1, 1}};
-    double targets[4] = {0, 1, 1, 0};
-
-
-    printf("Entrainement : \n");
-    for (unsigned int i = 0; i < 10000; i++) {
-        double total_error = 0;
-
-        for (unsigned int j = 0; j < 4; j++) {
-            for (unsigned int k = 0; k < 2; k++) {
-                network.layers[0].neurons[k].value = inputs[j][k];
-            }
-            FrontPropagation(&network, inputs[j]);
-            double error = targets[j] - network.layers[network.nbLayers - 1].neurons[0].value;
-            total_error += 0.5 * error * error;
-            BackPropagation(&network, &targets[j]);
-            GradientDescent(&network, 0.1);
-        }
-
-        if (i % 1000 == 0) {
-            printf("Epoque %d, Error: %lf\n", i, total_error);
-        }
-
-    }
-        //PrintNetwork(&network);
-
-        //test du réseau de neurone
-        printf("Test du réseau de neurone :\n");
-        for (unsigned int i = 0; i < 4; i++) {
-            FrontPropagation(&network, inputs[i]);
-            for(unsigned int j = 0; j < 2; j++)
-            {
-                network.layers[0].neurons[j].value = inputs[i][j];
-            }
-            BackPropagation(&network, &targets[i]);
-            printf("Input : %f XOR %f =", inputs[i][0], inputs[i][1]);
-            printf(" %f\n", network.layers[network.nbLayers - 1].neurons[0].value);
-        }
-
-        FreeNetwork(&network);
-
-        return 0;
-
-}

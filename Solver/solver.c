@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include "solver.h"
 // Taille de la grille de sudoku (9x9)
 #define TAILLE_GRILLE 9
 
@@ -145,64 +146,26 @@ bool resoudreListeSudoku(int liste[]) {
 }
 
 void exportListeSudoku(int liste[], char *path) {
-    //creer un fichier
+    // Créer un fichier
     FILE *fichier = fopen(path, "w");
     if (fichier == NULL) {
         printf("Impossible d'ouvrir le fichier %s\n", path);
         return;
     }
 
-    //ecrire dans le fichier
+    // Ecrire dans le fichier
     for (int i = 0; i < TAILLE_GRILLE * TAILLE_GRILLE; i++) {
         if (liste[i] == 0)
             fprintf(fichier, ".");
         else
-            fprintf(fichier, "%d", liste[i]);
-        if((i + 1) % 3 == 0)
-            fprintf(fichier, "   ");
-        if ((i + 1) % TAILLE_GRILLE == 0) {
-            fprintf(fichier, "\n");
-        }
-        if ((i + 1) % (TAILLE_GRILLE * 3) == 0 && i != TAILLE_GRILLE * TAILLE_GRILLE - 1) {
-            fprintf(fichier, "\n");
-        }
+            fprintf(fichier, "%d ", liste[i]);
+
     }
 
     fclose(fichier);
 }
 
-/*int main() {
-    int listeSudoku[TAILLE_GRILLE * TAILLE_GRILLE] = {
-            5, 3, 0, 0, 7, 0, 0, 0, 0,
-            6, 0, 0, 1, 9, 5, 0, 0, 0,
-            0, 9, 8, 0, 0, 0, 0, 6, 0,
-            8, 0, 0, 0, 6, 0, 0, 0, 3,
-            4, 0, 0, 8, 0, 3, 0, 0, 1,
-            7, 0, 0, 0, 2, 0, 0, 0, 6,
-            0, 6, 0, 0, 0, 0, 2, 8, 0,
-            0, 0, 0, 4, 1, 9, 0, 0, 5,
-            0, 0, 0, 0, 8, 0, 0, 7, 9
-    };
-
-    exportListeSudoku(listeSudoku, "/home/xaviax/spe/OCR/Solver/grille_sudoku.txt");
-
-    printf("Liste représentant la grille de sudoku à résoudre :\n");
-    afficherListeSudoku(listeSudoku);
-
-    if (resoudreListeSudoku(listeSudoku)) {
-        printf("\nListe représentant la grille de sudoku résolue :\n");
-        afficherListeSudoku(listeSudoku);
-    } else {
-        printf("\nAucune solution trouvée pour la liste représentant la grille de sudoku.\n");
-    }
-
-    printf("\n");
-
-    exportListeSudoku(listeSudoku, "/home/xaviax/spe/OCR/Solver/grille_sudoku_resolue.txt");
-
-    return 0;
-}*/
-
+/*
 //Main qui en entrer prend une liste d'argument, le premier argument est le nom du fichier d'entrer contenant la grille de sudoku a resoudre,
 //en sortie le programme affiche la grille de sudoku resolue dans le fichier de sortie dont le nom est le meme que le fichier d'entrer avec l'extension".result"
 
@@ -241,6 +204,7 @@ int main(int argc, char *argv[]) {
     // Résoudre la liste représentant la grille de sudoku
     if (resoudreListeSudoku(listeSudoku)) {
         // Exporter la liste représentant la grille de sudoku résolue
-        exportListeSudoku(listeSudoku, strcat(argv[1], ".result"));
+        exportListeSudoku(listeSudoku, "/home/xaviax/spe/OCR/Solver/grille_sudoku_resolue.txt");
     }
 }
+ */
