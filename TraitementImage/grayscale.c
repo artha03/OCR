@@ -92,52 +92,16 @@ SDL_Surface* load_image(const char* path)
 //
 // pixel_color: Color of the pixel to convert in the RGB format.
 // format: Format of the pixel used by the surface.
-Uint32 pixel_to_bin(Uint32 pixel_color, SDL_PixelFormat* format)
-{
-    Uint8 r, g, b;
-    SDL_GetRGB(pixel_color, format, &r, &g, &b);
-
-    Uint8 average = 0.3*r + 0.59*g + 0.11*b;
-
-    Uint32 color;
-
-    if(average>=127)
-      {
-	color = SDL_MapRGB(format,0, 0, 0);
-      }
-    else
-      {
-	color = SDL_MapRGB(format, 255,255, 255);
-      }
-
-    return color;
-}
-
-void surface_to_bin(SDL_Surface* surface)
-{
-    Uint32* pixels = surface->pixels;
-    int len = surface->w * surface->h;
-    SDL_PixelFormat* format = surface->format;
-
-    SDL_LockSurface(surface);
-    for (int i = 0;i<len;i++)
-      {
-	pixels[i] = pixel_to_grayscale(pixels[i],format);
-      }
-    SDL_UnlockSurface(surface);
-
-    //int w= surface->w;
-    //int h = surface->h;
-
-    //for(int i = 0; i < h; i++)
-    // {
-    //for(int j = 0; j < w; j++)
-    //	  {
-    //	    Uint32 color = SDL_GetRGB(pixels[i*w+j, s->format, &r, &g, &b);
-    //	    pixels[i * w + j] = SDL_MapRGB(s->format, 255 - color.r, 255 - color.g, 255 - color.b);
-    //	  }
-    //}
-
+void convertToGray(SDL_Surface *image) {
+    for (int y = 0; y < image->h; ++y) {
+        for (int x = 0; x < image->w; ++x) {
+            Uint32 pixel = *((Uint32*)image->pixels + y * image->w + x);
+            Uint8 r, g, b, a;
+            SDL_GetRGBA(pixel, image->format, &r, &g, &b, &a);
+            Uint8 gray = 0.3 * r + 0.59 * g + 0.11 * b;
+            *((Uint32*)image->pixels + y * image->w + x) = SDL_MapRGBA(image->format, gray, gray, gray, a);
+        }
+    }
 }
 
 int main(int argc, char** argv)

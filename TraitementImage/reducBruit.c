@@ -62,7 +62,7 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* chang
 }
 
 
-void moyenneMobileImage(SDL_Surface *image, SDL_Surface *resultat) {
+void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
     int fenetre = 3;
 
     for (int i = 0; i < image->h; i++)
@@ -91,17 +91,13 @@ void moyenneMobileImage(SDL_Surface *image, SDL_Surface *resultat) {
                     }
                 }
             }
-
             Uint8 avgR = sommeR / pixelCount;
             Uint8 avgG = sommeG / pixelCount;
             Uint8 avgB = sommeB / pixelCount;
-
-            valeurPixel = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000
-            resultat.pixels[i * resultat.w + j] = valeurPixel;
+            ((Uint32 *)resultat->pixels)[i * resultat->w + j] = avgR | (avgG << 8) | (avgB << 16) | 0xFF000000;
         }
     }
 }
-
 
 int main(int argc,char** argv)
 {

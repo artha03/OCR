@@ -613,7 +613,7 @@ int main(int argc, char** argv)
     convertToGray(resultatSurface);
 
 
-    surface_to_bin(resultatSurface);
+    //surface_to_bin(resultatSurface);
 
     
     SDL_Texture * texture_change = SDL_CreateTextureFromSurface(renderer, resultatSurface);

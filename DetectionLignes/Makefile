@@ -2,9 +2,9 @@
 
 CC = gcc
 CPPFLAGS =
-CFLAGS =
+CFLAGS = -Wall -Wextra -O3 `pkg-config --cflags sdl2 SDL2_image`
 LDFLAGS =
-LDLIBS = -lSDL2 -lSDL2_image -lm
+LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lSDL2_gfx -lm
 
 all: transformeeHough transformeeHough2 transformeeHough3 filtreCanny HoughTransform dec rogne
 

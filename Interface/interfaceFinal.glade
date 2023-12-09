@@ -169,16 +169,25 @@
           <object class="GtkPaned" id="panel">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
+            <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+            <property name="resize-mode">immediate</property>
             <child>
-              <object class="GtkImage" id="sudoku">
-                <property name="width-request">100</property>
-                <property name="height-request">100</property>
+              <object class="GtkEventBox" id="event_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="stock">gtk-missing-image</property>
+                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                <child>
+                  <object class="GtkImage" id="sudoku">
+                    <property name="width-request">100</property>
+                    <property name="height-request">100</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="stock">gtk-missing-image</property>
+                  </object>
+                </child>
               </object>
               <packing>
-                <property name="resize">True</property>
+                <property name="resize">False</property>
                 <property name="shrink">True</property>
               </packing>
             </child>
