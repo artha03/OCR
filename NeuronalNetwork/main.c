@@ -47,12 +47,12 @@ void saveSudokuGrid(const char *filePath, int *predictions) {
 
 int main() {
     srand(time(NULL)); // Initialisation du générateur de nombres aléatoires
-/*
-    // Chemin vers le dossier contenant les données d'entraînement
+
+   /* // Chemin vers le dossier contenant les données d'entraînement
     char *trainPath = "Train";
 
     // Chargement des données d'entraînement (10 échantillons par classe)
-    int numSamplesPerClass = 26;
+    int numSamplesPerClass = 27;
     TrainingSample *trainingData = loadTrainingData(trainPath, numSamplesPerClass);
     printf("trainingData: %p\n", trainingData);
 
@@ -68,12 +68,13 @@ int main() {
         printf("Erreur lors de la préparation des étiquettes d'entraînement.\n");
         return 1;
     }
-*/
 
+*/
     // Création du réseau de neurones avec la structure souhaitée (à adapter selon votre structure)
     Network network = NewNetwork(IMG_WIDTH * IMG_HEIGHT, 32, NUM_CLASSES, 1);
     InitNetwork(&network);
-/*
+
+    /*
     // Entraînement du réseau de neurones avec les données d'entraînement
     double learningRate = 0.01;
     int epochs = 5000;
@@ -116,7 +117,7 @@ int main() {
 */
     // Chargement du réseau de neurones entraîné
     Network loadedNetwork = LoadNetwork("network.txt");
-   /* for (int i = 0; i < 81; ++i) {
+    /*for (int i = 0; i < 81; ++i) {
         char imagePath[PATH_MAX];
         sprintf(imagePath, "%s/Image_%d.png", testPath2, i);
 
@@ -142,15 +143,14 @@ int main() {
         free(testData);
         SDL_FreeSurface(testImage);
     }
-
-    // Libération de la mémoire allouée
-    //FreeNetwork(&network);
-    FreeNetwork(&loadedNetwork);
+*/
+    //Libération de la mémoire allouée
+   // FreeNetwork(&network);
+  //  FreeNetwork(&loadedNetwork);
     // free(trainingData);
     //free(trainingLabels);
 
-    return 0;*/
-    const char *testPath = "./../DetectionLignes/Decoupage/resize/"; // Changer le chemin approprié
+    const char *testPath = "./../DetectionLignes/Decoupage/resize"; // Changer le chemin approprié
     int predictions[81] = {0}; // Tableau pour stocker les prédictions
 
     for (int i = 0; i < 81; ++i) {
@@ -185,7 +185,10 @@ int main() {
     // Enregistrer les prédictions dans un fichier texte
     saveSudokuGrid("./../Solver/grille_sudoku.txt", predictions);
 
+
     // Libération de la mémoire allouée
+  //   free(trainingData);//////train
+   // free(trainingLabels);////train
     FreeNetwork(&network);
     FreeNetwork(&loadedNetwork);
 
