@@ -122,10 +122,7 @@ int getPredictedLabel(Network *network) {
 #define IMG_HEIGHT 28  // Hauteur des images (à adapter selon vos images)
 
 
-typedef struct {
-    double *data;
-    int label;
-} TrainingSample;
+
 
 TrainingSample* loadTrainingData(const char *basePath, int numSamplesPerClass) {
     TrainingSample *trainingData = malloc(NUM_CLASSES * numSamplesPerClass * sizeof(TrainingSample));

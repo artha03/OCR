@@ -8,5 +8,6 @@ bool estListeSudokuCorrecte(int liste[], int taille) ;
 bool remplirListeSudokuRecursivement(int liste[], int index) ;
 bool resoudreListeSudoku(int liste[]) ;
 void exportListeSudoku(int liste[], char *path) ;
+void exportListeSudokuFalse(int listeSudoku[], char *filename)  ;
 
 #endif

@@ -28,15 +28,18 @@ int main() {
     fclose(fichier);
 
 
-    // Vérifier que la liste est valide
+
     if (!estGrilleSudokuValide(listeSudoku, index)) {
         printf("La liste n'est pas valide.\n");
         return 1;
     }
 
-    // Résoudre la liste représentant la grille de sudoku
-    if (resoudreListeSudoku(listeSudoku)) {
-        // Exporter la liste représentant la grille de sudoku résolue
+
+   if (!estListeSudokuCorrecte(listeSudoku, index))
+       exportListeSudokuFalse(listeSudoku, "grille_sudoku_resolue.txt");
+   else{
+        printf("La liste est correcte.\n");
+        (resoudreListeSudoku(listeSudoku));
         exportListeSudoku(listeSudoku, "grille_sudoku_resolue.txt");
     }
 

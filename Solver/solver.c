@@ -165,6 +165,26 @@ void exportListeSudoku(int liste[], char *path) {
     fclose(fichier);
 }
 
+void exportListeSudokuFalse(int listeSudoku[], char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Erreur lors de l'ouverture du fichier : %s\n", filename);
+        return;
+    }
+
+    // Remplacement des points par des zéros si la liste n'est pas valide
+    for (int i = 0; i < TAILLE_GRILLE*TAILLE_GRILLE; i++) {
+        if (listeSudoku[i] == 0) {
+            fprintf(file, "%d ", 0);
+        } else {
+            fprintf(file, "%d ", listeSudoku[i]);
+        }
+        // Ajouter des sauts de ligne ou des séparateurs si nécessaire
+    }
+    printf("exportListeSudokuFalse\n");
+    fclose(file);
+}
+
 /*
 //Main qui en entrer prend une liste d'argument, le premier argument est le nom du fichier d'entrer contenant la grille de sudoku a resoudre,
 //en sortie le programme affiche la grille de sudoku resolue dans le fichier de sortie dont le nom est le meme que le fichier d'entrer avec l'extension".result"

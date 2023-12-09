@@ -12,8 +12,11 @@ void drawText(SDL_Renderer *renderer, TTF_Font *font, int value, int x, int y) {
     SDL_Color color = {0 , 0, 0, 0}; // Couleur blanche
 
     char text[2];
-    sprintf(text, "%d", value); // Convertir la valeur en chaîne de caractères
-
+    if (value== -1)
+        sprintf(text, "%d", 0);
+    else {
+        sprintf(text, "%d", value); // Convertir la valeur en chaîne de caractères
+    }
     SDL_Surface *textSurface = TTF_RenderText_Solid(font, text, color); // Créer une surface de texte
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface); // Créer une texture de texte
 
@@ -105,6 +108,7 @@ int displaySudoku(const char *imagePath, const char *numberFile) {
     int value;
 
     while (fscanf(file, "%d", &value) == 1) {
+
         drawText(renderer, font, value, x, y);
         x += CELL_SIZE;
 
@@ -120,8 +124,8 @@ int displaySudoku(const char *imagePath, const char *numberFile) {
 
     SDL_RenderPresent(renderer);
 
-    time_t t = time(NULL);
-    struct tm tm = *localtime(&t);
+   // time_t t = time(NULL);
+    //struct tm tm = *localtime(&t);
     char filename[50];
     snprintf(filename, sizeof(filename), "resultat.png");
 
