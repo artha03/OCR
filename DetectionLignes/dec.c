@@ -1,4 +1,3 @@
-#include "dec.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,9 +5,12 @@
 #include "SDL2/SDL_image.h"
 #include "err.h"
 
+#include "dec.h"
+
 #define GRID_SIZE 9
 #define THRESHOLD 100
 
+/*
 SDL_Surface* load_image(const char* path)
 {
     SDL_Surface * image = IMG_Load(path);
@@ -17,7 +19,7 @@ SDL_Surface* load_image(const char* path)
     SDL_Surface * image_ = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_RGB888, 0);
     SDL_FreeSurface(image);
     return image_;
-}
+}*/
 
 /*
 SDL_Surface * create_image(SDL_Surface* surface,int startX, int startY)
@@ -44,7 +46,7 @@ SDL_Surface * create_image(SDL_Surface* surface,int startX, int startY)
     return new_surface;
 }*/
 
-SDL_Surface * new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y)
+void new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y)
 {
     int x = 0;
     char s[50];
@@ -56,7 +58,6 @@ SDL_Surface * new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y)
             SDL_Surface* cellSurface = SDL_CreateRGBSurface(0, CELL_SIZE_X, CELL_SIZE_Y, 32, 0, 0, 0, 0);
             SDL_BlitSurface(surface, &cellRect, cellSurface, NULL);
 
-            printf("avant sprintf\n");
             sprintf(s, "%s%d.jpeg", baseName, x);
             SDL_SaveBMP(cellSurface,s);
             x++;
@@ -65,6 +66,7 @@ SDL_Surface * new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y)
     }
 }
 
+/*
 SDL_Surface * decoupage_rouge(SDL_Surface * formattedImage)
 {
     // Parcourir chaque pixel et découper l'image en fonction de la détection de la couleur
@@ -82,8 +84,10 @@ SDL_Surface * decoupage_rouge(SDL_Surface * formattedImage)
             }
         }
     }
-}
+}*/
 
+
+/*
 int main(int argc, char ** argv)
 {
     // Checks the number of arguments.
@@ -122,26 +126,6 @@ int main(int argc, char ** argv)
 
     new_img(surface,CELL_SIZE_X,CELL_SIZE_Y);
 
-    /*
-    int nm = 0;
-    for (int i = 0; i < 9; ++i)
-    {
-        for (int j = 0; j < 9; ++j)
-        {
-
-            SDL_Surface * new = create_image(surface,i*NEW_TAILLE,j*NEW_TAILLE);
-            printf("%d\n",nm);
-            char s[50];
-            char * baseName = "Image_";
-            printf("avant sprintf\n");
-            sprintf(s, "%s%d.jpeg", baseName, nm);
-            printf("apres sprintf\n");
-            SDL_SaveBMP(new,s);
-            printf("apres save\n");
-            //SDL_FreeSurface(new);
-            nm++;
-        }
-    }*/
 
     //SDL_SaveBMP(resultatSurface, argv[2]);
 
@@ -151,4 +135,4 @@ int main(int argc, char ** argv)
     SDL_Quit();
 
     return 0;
-}
+}*/

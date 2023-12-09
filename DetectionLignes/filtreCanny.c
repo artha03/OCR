@@ -5,6 +5,8 @@
 #include <math.h>
 #include "err.h"
 
+#include "filtreCanny.h"
+
 #define SOBEL_THRESHOLD 50
 #define HIGH_THRESHOLD 50
 #define LOW_THRESHOLD 20
@@ -190,6 +192,7 @@ void convertToGray(SDL_Surface *image) {
     }
 }
 
+/*
 int main(int argc, char *argv[]) {
 
     // Checks the number of arguments.
@@ -251,4 +254,4 @@ int main(int argc, char *argv[]) {
     SDL_Quit();
 
     return 0;
-}
+}*/

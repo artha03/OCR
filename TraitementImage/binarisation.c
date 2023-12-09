@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "binarisation.h"
 
 // Fonction pour calculer l'histogramme d'une image en niveaux de gris
 void calculateHistogram(SDL_Surface* image, double histogram[256])

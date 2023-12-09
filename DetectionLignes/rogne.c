@@ -3,15 +3,20 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 
+#include "transformeeHough3.h"
+#include "rogne.h"
+
 #define WIDTH 800
 #define HEIGHT 600
 
+/*
 Uint8* pixelref(SDL_Surface *surface, int posx, int posy)
 {
     int bpp = surface->format->BytesPerPixel;
     return (Uint8*)surface->pixels + posy * surface->pitch + posx * bpp;
-}
+}*/
 
+/*
 Uint32 SDL_GetPixel(SDL_Surface *surface, int posx, int posy)
 {
     Uint8 *pixel = pixelref(surface, posx, posy);
@@ -31,7 +36,7 @@ Uint32 SDL_GetPixel(SDL_Surface *surface, int posx, int posy)
         default:
             return 0;
     }
-}
+}*/
 
 void detectSudokuGrid(SDL_Surface *image) {
     SDL_Surface *binaryImage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
@@ -73,6 +78,7 @@ void detectSudokuGrid(SDL_Surface *image) {
     SDL_FreeSurface(binaryImage);
 }
 
+/*
 int main(int argc, char **argv) {
     if (argc != 3)
         return EXIT_FAILURE;
@@ -119,4 +125,4 @@ int main(int argc, char **argv) {
     SDL_Quit();
 
     return EXIT_SUCCESS;
-}
+}*/

@@ -2,13 +2,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL2_rotozoom.h>
+#include "Rot.h"
 
-
+/*
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 {
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
-}
+}*/
 
 void perform_rotation(SDL_Renderer* renderer, double angle_rotation, SDL_Texture* texture, int w, int h, int new_width, int new_height, int c)
 {
@@ -34,7 +35,7 @@ void perform_rotation(SDL_Renderer* renderer, double angle_rotation, SDL_Texture
     //c = center;
 }
 
-
+/*
 void event_loop(SDL_Renderer* renderer, SDL_Texture* texture, int w, int h, int new_width, int new_height, double angle_rotation,int c)
 {
     SDL_Event event;
@@ -64,8 +65,9 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* texture, int w, int h, int 
                 break;
         }
     }
-}
+}*/
 
+/*
 SDL_Surface* load_image(const char* path)
 {
     SDL_Surface * image = IMG_Load(path);
@@ -75,8 +77,9 @@ SDL_Surface* load_image(const char* path)
     SDL_Surface * image_ = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_RGB888, 0);
     SDL_FreeSurface(image);
     return image_;
-}
+}*/
 
+/*
 int main(int argc, char** argv)
 {
     if (argc != 4)
@@ -108,7 +111,7 @@ int main(int argc, char** argv)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
 
-    /*
+
     draw(renderer, texture);
 
 
@@ -116,7 +119,7 @@ int main(int argc, char** argv)
     event_loop(renderer, texture, w, h, w, h, angle_rotation,c);
     //perform_rotation(renderer,angle_rotation,texture,w,h,w,h,c);
 
-     */
+
     double angle_rotation = atof(argv[2]);
     SDL_Surface * resultatSurface = rotozoomSurface(surface, angle_rotation, 1.0, 0);
     SDL_SaveBMP(resultatSurface, argv[3]);
@@ -128,3 +131,4 @@ int main(int argc, char** argv)
 
     return EXIT_SUCCESS;
 }
+*/

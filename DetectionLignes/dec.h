@@ -1,8 +1,6 @@
-//
-// Created by epita on 12/5/23.
-//
+#ifndef DEC_H
+#define DEC_H
 
-#ifndef TRANSFORMEEHOUGH3_DEC_H
-#define TRANSFORMEEHOUGH3_DEC_H
+void new_img(SDL_Surface * surface,int CELL_SIZE_X, int CELL_SIZE_Y);
 
-#endif //TRANSFORMEEHOUGH3_DEC_H
+#endif

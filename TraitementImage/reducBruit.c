@@ -2,8 +2,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <err.h>
+#include "reducBruit.h"
 
-
+/*
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 {
     SDL_RenderCopy(renderer,texture,NULL,NULL);
@@ -20,8 +21,9 @@ SDL_Surface* load_image(const char* path)
     SDL_Surface * image_ = SDL_ConvertSurfaceFormat(image, SDL_PIXELFORMAT_RGB888, 0);
     SDL_FreeSurface(image);
     return image_;
-}
+}*/
 
+/*
 void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* change)
 {
     SDL_Event event;
@@ -60,7 +62,7 @@ void event_loop(SDL_Renderer* renderer, SDL_Texture* colored, SDL_Texture* chang
         }
     }
 }
-
+*/
 
 void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
     int fenetre = 3;
@@ -98,7 +100,7 @@ void reduction_Bruit(SDL_Surface *image, SDL_Surface *resultat) {
         }
     }
 }
-
+/*
 int main(int argc,char** argv)
 {
       // Checks the number of arguments.
@@ -163,4 +165,4 @@ int main(int argc,char** argv)
     SDL_Quit();
 
     return EXIT_SUCCESS;
-}
+}*/

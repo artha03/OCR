@@ -4,17 +4,12 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 
+#include "transformeeHough3.h"
+
 #define WIDTH 800
 #define HEIGHT 600
 #define MAX_LINES 1000
 
-
-typedef struct
-{
-    double rho;
-    double theta;
-    int direction; // 0:horizontal    1:vertical
-} Line;
 
 Uint8 *pixelref(SDL_Surface *surface, int posx, int posy)
 {
@@ -77,16 +72,6 @@ void SDL_DrawLine(SDL_Surface *surface, int x1, int y1, int x2, int y2, Uint32 c
             y1 += sy;
         }
     }
-}
-
-int moyenne(int *l,int taille)
-{
-    int somme = 0;
-    for (int i = 0; i < taille; ++i)
-    {
-        somme += l[i];
-    }
-    return somme / taille;
 }
 
 
@@ -185,13 +170,6 @@ void houghTransform(SDL_Surface *cannyImage)
                             // Ajouter une nouvelle ligne seulement si elle n'est pas proche des autres lignes
                             lines[linesCount].rho = rho;
                             lines[linesCount].theta = theta;
-                            if (fabs(cos(radians)) < 0.1) {
-                                // La ligne est horizontal
-                                lines[linesCount].direction = 0;
-                            } else if (fabs(sin(radians)) < 0.1) {
-                                // La ligne est verticale
-                                lines[linesCount].direction = 1;
-                            }
                             linesCount++;
                         }
                     }
@@ -200,13 +178,7 @@ void houghTransform(SDL_Surface *cannyImage)
         }
     }
 
-    int l_x[linesCount];
-    int l_y[linesCount];
-    for (int i = 0; i < linesCount; ++i) {
-        l_x[i] = 0;
-        l_y[i] = 0;
-    }
-    int parcours = 0;
+
     for (int i = 0; i < linesCount; ++i)
     {
         Line currentLine = lines[i];
@@ -222,25 +194,7 @@ void houghTransform(SDL_Surface *cannyImage)
         int x2 = (int)(x0 + scale * b);
         int y2 = (int)(y0 - scale * a);
 
-        int faire = 0;
-        for (int j = 0; j < linesCount; ++j)
-        {
-            if (currentLine.direction == 1 && (l_x[j] != 0 && abs(l_x[j] - x1) < 60))
-            {
-                faire = 1;
-            }
-            if (currentLine.direction == 0 && (l_y[j] != 0 && abs(l_y[j] - y1) < 60))
-            {
-                faire = 1;
-            }
-        }
-        if(faire == 0)
-        {
-            SDL_DrawLine(cannyImage, x1, y1, x2, y2, 0xFF0000);
-            l_x[parcours] = x1;
-            l_y[parcours] = y1;
-            parcours++;
-        }
+        SDL_DrawLine(cannyImage, x1, y1, x2, y2, 0xFF0000);
 
     }
     
@@ -252,7 +206,7 @@ void houghTransform(SDL_Surface *cannyImage)
 }
 
 
-
+/*
 int main(int argc, char ** argv) {
 
     if(argc != 3)
@@ -303,4 +257,4 @@ int main(int argc, char ** argv) {
     SDL_Quit();
 
     return EXIT_SUCCESS;
-}
+}*/

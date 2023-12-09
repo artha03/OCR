@@ -1,6 +1,7 @@
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "grayscale.h"
 
 // Updates the display.
 //
@@ -103,7 +104,7 @@ void convertToGray(SDL_Surface *image) {
         }
     }
 }
-
+/*
 int main(int argc, char** argv)
 {
     // Checks the number of arguments.
@@ -167,4 +168,4 @@ int main(int argc, char** argv)
     SDL_Quit();
 
     return EXIT_SUCCESS;
-}
+}*/
