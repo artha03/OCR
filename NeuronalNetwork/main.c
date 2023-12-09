@@ -155,7 +155,7 @@ int main() {
 
     for (int i = 0; i < 81; ++i) {
         char imagePath[PATH_MAX];
-        sprintf(imagePath, "%s/Image_invert_%d.png", testPath, i);
+        sprintf(imagePath, "%s/Image_%d.png", testPath, i);
 
         // Charger l'image de test
         SDL_Surface *testImage = IMG_Load(imagePath);
